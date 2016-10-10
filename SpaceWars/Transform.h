@@ -1,13 +1,16 @@
-#include <DirectXMath.h>
+#include "DXCore.h"
+#include <SimpleMath.h>
+
+using namespace DirectX::SimpleMath;
 
 #pragma once
 class Transform
 {
-	DirectX::XMFLOAT3 position;
-	DirectX::XMFLOAT3 scale;
-	DirectX::XMFLOAT3 rotation;
+	Vector3 position;
+	Vector3 scale;
+	Vector3 rotation;
 
-	DirectX::XMFLOAT4X4 matrix;
+	Matrix matrix;
 	bool dirty;
 
 public:
@@ -26,20 +29,16 @@ public:
 	void SetScale(float x, float y, float z);
 	void SetRotation(float x, float y, float z);
 
-	void SetPosition(DirectX::XMFLOAT3 position);
-	void SetScale(DirectX::XMFLOAT3 scale);
-	void SetRotation(DirectX::XMFLOAT3 rotation);
+	void SetPosition(Vector3 position);
+	void SetScale(Vector3 scale);
+	void SetRotation(Vector3 rotation);
 
-	void SetPosition(DirectX::XMVECTOR position);
-	void SetScale(DirectX::XMVECTOR scale);
-	void SetRotation(DirectX::XMVECTOR rotation);
+	Vector3 GetPosition();
+	Vector3 GetScale();
+	Vector3 GetRotation();
 
-	DirectX::XMFLOAT3 GetPosition();
-	DirectX::XMFLOAT3 GetScale();
-	DirectX::XMFLOAT3 GetRotation();
+	Quaternion GetOrientation();
 
-	DirectX::XMVECTOR GetOrientation();
-
-	DirectX::XMFLOAT4X4 GetMatrix();
+	Matrix GetMatrix();
 };
 

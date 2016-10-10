@@ -87,11 +87,19 @@ void Camera::UpdateViewMatrix()
 	XMStoreFloat4x4(&viewMatrix, XMMatrixTranspose(V)); // Transpose for HLSL!
 }
 
+Vector3 Camera::getForward() {
+	Vector3 rotation = transform->GetRotation();
+	//Rotation Quaternion - the camera behaves properly w/ YXZ instead of XYZ
+	//Alos not sure why it needs to be x/2, y/2 (and probably z/2)
+	Quaternion rot = Quaternion::CreateFromYawPitchRoll(rotation.y / 2, rotation.x, rotation.z / 2);
+	return Vector3::Transform(Vector3(0, 0, 1), rot);
+}
+
 //Move the camera forward(+)/back(-) the by the given amount
 void Camera::Advance(float units)
 {
-	XMVECTOR position = XMLoadFloat3(&transform->GetPosition());
-	XMVECTOR forward = XMQuaternionMultiply(XMVectorSet(0, 0, 1, 0), transform->GetOrientation());
+	Vector3 position = transform->GetPosition();
+	Vector3 forward = getForward();
 	position += forward * units;
 	transform->SetPosition(position);
 }
@@ -99,8 +107,8 @@ void Camera::Advance(float units)
 //Move the camera right(+)/left(-) by the given amount
 void Camera::Strafe(float units)
 {
-	XMVECTOR position = XMLoadFloat3(&transform->GetPosition());
-	XMVECTOR forward = XMQuaternionMultiply(XMVectorSet(0, 0, 1, 0), transform->GetOrientation());
+	Vector3 position = transform->GetPosition();
+	Vector3 forward = getForward();
 	XMVECTOR right = XMVector3Cross(forward, XMVectorSet(0, 1, 0, 0));
 	position += right * units;
 	transform->SetPosition(position);
@@ -117,6 +125,8 @@ void Camera::Ascend(float units)
 void Camera::Rotate(float x, float y)
 {
 	XMFLOAT3 rotation = transform->GetRotation();
-	float FOUR_PI = 12.56f; //I'm not sure why a full rotation is 4*PI instead of 2*PI...
+	//I'm not sure why a full rotation is 4*PI instead of 2*PI...
+	//This is probably related to needing to divide rotation by 2 in get forward
+	float FOUR_PI = 12.56f; 
 	transform->SetRotation(fmod(rotation.x + x, FOUR_PI), fmod(rotation.y + y, FOUR_PI), 0);
 }

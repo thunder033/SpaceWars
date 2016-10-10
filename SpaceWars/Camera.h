@@ -10,6 +10,8 @@ class Camera
 
 	DirectX::XMFLOAT4X4 viewMatrix;
 	DirectX::XMFLOAT4X4 projectionMatrix;
+
+	Vector3 getForward();
 public:
 	Camera(float aspectRatio);
 	~Camera();
