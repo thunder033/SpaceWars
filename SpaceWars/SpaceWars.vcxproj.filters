@@ -16,6 +16,21 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{5f37ec8c-c624-4f3d-8d2e-1571a1df475b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\KInput">
+      <UniqueIdentifier>{f3f96897-be86-491d-814c-1f0bd00fdab0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\KModel">
+      <UniqueIdentifier>{73f7a2ee-c800-4d53-bfe2-3de111269a67}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\KRender">
+      <UniqueIdentifier>{139db011-6016-42e8-b8ca-1f7e1cfc7d18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\KGame">
+      <UniqueIdentifier>{8cfab2bd-1efc-4820-981f-9006fa68e15a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\DirectX">
+      <UniqueIdentifier>{341e6439-ae99-44ed-87a8-12b248db0373}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -51,14 +66,8 @@
     <ClCompile Include="Collider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OBB.hpp">
-      <Filter>Header Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="DXCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -91,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="Collider.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DXCore.h">
+      <Filter>Header Files\DirectX</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
