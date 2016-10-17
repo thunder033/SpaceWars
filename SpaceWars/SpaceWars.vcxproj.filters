@@ -31,6 +31,9 @@
     <Filter Include="Header Files\DirectX">
       <UniqueIdentifier>{341e6439-ae99-44ed-87a8-12b248db0373}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\KShader">
+      <UniqueIdentifier>{12688c0c-2f3c-4874-b7ae-be98af93ffe9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -103,6 +106,24 @@
     </ClInclude>
     <ClInclude Include="DXCore.h">
       <Filter>Header Files\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="KContext.h">
+      <Filter>Header Files\DirectX</Filter>
+    </ClInclude>
+    <ClInclude Include="InputReader.h">
+      <Filter>Header Files\KInput</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelID.h">
+      <Filter>Header Files\KModel</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\KModel</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderID.h">
+      <Filter>Header Files\KShader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files\KShader</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
