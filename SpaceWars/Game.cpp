@@ -64,7 +64,6 @@ Game::~Game()
 	delete camera;
 
 	crateSrv->Release();
-	defaultTexture->Release();
 
 	delete renderer;
 }
