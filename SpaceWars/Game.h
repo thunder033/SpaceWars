@@ -43,11 +43,9 @@ private:
 	Mesh** meshes;
 
 	//Textures
-	ID3D11ShaderResourceView* defaultSrv;
 	ID3D11ShaderResourceView* crateSrv;
 
 	//Rendering Data
-	ID3D11Texture2D* defaultTexture;
 	std::map<std::string, Material*> materials;
 	Camera* camera;
 	DirectionalLight* lights;

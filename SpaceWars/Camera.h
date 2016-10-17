@@ -18,17 +18,17 @@ public:
 
 	void Update(double deltaTime, double elapsedTime);
 
-	void SetAspectRatio(float aspectRatio);
+	void setAspectRatio(float aspectRatio);
 
-	void UpdateViewMatrix();
+	void updateViewMatrix();
 
-	void Advance(float units);
+	void advance(float units);
 
-	void Strafe(float units);
+	void strafe(float units);
 
-	void Ascend(float units);
+	void ascend(float units);
 
-	void Rotate(float x, float y);
+	void rotate(float x, float y);
 
 	DirectX::XMFLOAT4X4 getViewMatrix() {
 		return viewMatrix;

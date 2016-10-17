@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Vertex.h"
 #include "WICTextureLoader.h"
+#include <SpriteFont.h>
 
 // For the DirectX Math library
 using namespace DirectX;
@@ -80,7 +81,7 @@ void Game::Init()
 	// Helper methods for loading shaders, creating some basic
 	// geometry to draw and some simple camera matrices.
 	//  - You'll be expanding and/or replacing these later
-	camera->SetAspectRatio((float)width / height);
+	camera->setAspectRatio((float)width / height);
 
 	//Wood Texture
 	CreateWICTextureFromFile(
@@ -156,7 +157,7 @@ void Game::OnResize()
 	DXCore::OnResize();
 
 	// Update our projection matrix since the window size changed
-	camera->SetAspectRatio((float)width / height);
+	camera->setAspectRatio((float)width / height);
 }
 
 // --------------------------------------------------------
@@ -297,7 +298,7 @@ void Game::OnMouseMove(WPARAM buttonState, int x, int y)
 	// Add any custom code here...
 	if (mouseDragging) {
 		float rotateSpeed = 0.005f;
-		camera->Rotate((y - prevMousePos.y) * rotateSpeed, (x - prevMousePos.x) * rotateSpeed);
+		camera->rotate((y - prevMousePos.y) * rotateSpeed, (x - prevMousePos.x) * rotateSpeed);
 	}
 
 	// Save the previous mouse position, so we have it for the future

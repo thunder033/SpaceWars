@@ -2,7 +2,7 @@
 
 
 
-void Renderer::CreateDefaultMaterial()
+void Renderer::createDefaultMaterial()
 {
 	unsigned char textureColor[] = { 255, 255, 255, 255 };
 
@@ -41,7 +41,7 @@ void Renderer::CreateDefaultMaterial()
 // - SimpleShader provides helpful methods for sending
 //   data to individual variables on the GPU
 // --------------------------------------------------------
-void Renderer::LoadShaders()
+void Renderer::loadShaders()
 {
 	vertexShader = new SimpleVertexShader(device, context);
 	if (!vertexShader->LoadShaderFile(L"Debug/VertexShader.cso"))
@@ -63,7 +63,7 @@ void Renderer::LoadShaders()
 	// scenarios work correctly, although others exist
 }
 
-void Renderer::CreateSampler()
+void Renderer::createSampler()
 {
 	//Create a sampler state for texture sampling
 	D3D11_SAMPLER_DESC samplerDesc = {};
@@ -85,9 +85,9 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context)
 	this->device = device;
 	this->context = context;
 
-	LoadShaders();
-	CreateSampler();
-	CreateDefaultMaterial();
+	loadShaders();
+	createSampler();
+	createDefaultMaterial();
 }
 
 
@@ -96,9 +96,11 @@ Renderer::~Renderer()
 {
 	delete vertexShader;
 	delete pixelShader;
+	delete baseMaterial;
 
 	sampler->Release();
 	defaultSrv->Release();
+	defaultTexture->Release();
 }
 
 void Renderer::Render(Entity * entity, Camera * camera)

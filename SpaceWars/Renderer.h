@@ -24,9 +24,9 @@ class Renderer
 	ID3D11ShaderResourceView* defaultSrv;
 	Material* baseMaterial;
 
-	void LoadShaders();
-	void CreateSampler();
-	void CreateDefaultMaterial();
+	void loadShaders();
+	void createSampler();
+	void createDefaultMaterial();
 	
 public:
 	Renderer(ID3D11Device* device, ID3D11DeviceContext* context);
