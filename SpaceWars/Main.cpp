@@ -1,6 +1,6 @@
 
 #include <Windows.h>
-#include "Game.h"
+//#include "Game.h"
 
 // --------------------------------------------------------
 // Entry point for a graphical (non-console) Windows application
@@ -17,10 +17,15 @@ int WINAPI WinMain(
 	//  - You may want to use something more advanced, like Visual Leak Detector
 	_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
+	return 0;
+	/*
+	
 
 	// Create the Game object using
 	// the app handle we got from WinMain
 	Game dxGame(hInstance);
+
+	
 
 	// Result variable for function calls below
 	HRESULT hr = S_OK;
@@ -38,4 +43,5 @@ int WINAPI WinMain(
 	// Begin the message and game loop, and then return
 	// whatever we get back once the game loop is over
 	return dxGame.Run();
+	*/
 }
