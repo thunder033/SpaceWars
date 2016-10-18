@@ -1,12 +1,13 @@
-//#include "Collider.h"
-//
-//
-//
-//Collider::Collider()
-//{
-//}
-//
-//
-//Collider::~Collider()
-//{
-//}
+#include "Collider.h"
+
+
+
+Collider::Collider()
+{
+
+}
+
+
+Collider::~Collider()
+{
+}

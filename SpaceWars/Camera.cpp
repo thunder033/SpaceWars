@@ -87,7 +87,6 @@ void Camera::updateViewMatrix()
 Vector3 Camera::getForward() {
 	Vector3 rotation = transform->GetRotation();
 	//Rotation Quaternion - the camera behaves properly w/ YXZ instead of XYZ
-	//Alos not sure why it needs to be x/2, y/2 (and probably z/2)
 	Quaternion rot = Quaternion::CreateFromYawPitchRoll(rotation.y, rotation.x, rotation.z);
 	return Vector3::Transform(Vector3(0, 0, 1), rot);
 }
