@@ -1,14 +1,14 @@
 #pragma once
 #include <map>
-#include "DXCore.h"
-#include "InputReader.h"
-#include "KGraphic/Mesh.h"
-#include "KGraphic/MeshID.h"
-#include "Shader.h"
-#include "ShaderID.h"
+#include "DirectX\DXCore.h"
+#include "Input\InputReader.h"
+#include "Graphic\Mesh.h"
+#include "Graphic\MeshID.h"
+#include "Graphic\Shader.h"
+#include "Graphic\ShaderID.h"
 
-namespace KDirectX {
-	class KContext:DXCore {
+namespace NDirectX {
+	class KContext: DXCore {
 		KInput::InputReader e;
 		std::map<KModel::Mesh, KModel::MeshId> models;
 		std::map<KShader::ShaderID, KShader::Shader> shaders;

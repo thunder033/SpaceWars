@@ -2,7 +2,7 @@
 
 #include <WindowsX.h>
 #include <sstream>
-
+using namespace NDirectX;
 // Define the static instance variable so our OS-level 
 // message handling function below can talk to our object
 DXCore* DXCore::DXCoreInstance = 0;

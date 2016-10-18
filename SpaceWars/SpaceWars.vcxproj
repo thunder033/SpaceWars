@@ -86,7 +86,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>C:\Users\kyunghwan chang\Documents\GitHub\SpaceWars\SpaceWars\Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\Files;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -121,10 +121,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Files\DirectX\DXCore.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Files\DirectX\DXCore.h" />
+    <ClInclude Include="Files\DirectX\KContext.h" />
+    <ClInclude Include="Files\Graphic\Mesh.h" />
+    <ClInclude Include="Files\Graphic\MeshID.h" />
+    <ClInclude Include="Files\Graphic\Shader.h" />
+    <ClInclude Include="Files\Graphic\ShaderID.h" />
+    <ClInclude Include="Files\Input\InputReader.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

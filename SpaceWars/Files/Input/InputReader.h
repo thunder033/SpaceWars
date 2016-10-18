@@ -1,5 +1,5 @@
 #pragma once
-namespace KInput {
+namespace NInput {
 	class InputReader {
 
 	};

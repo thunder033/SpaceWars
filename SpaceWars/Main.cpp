@@ -1,5 +1,6 @@
 
 #include <Windows.h>
+#include "DirectX\KContext.h"
 //#include "Game.h"
 
 // --------------------------------------------------------
