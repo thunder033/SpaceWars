@@ -14,6 +14,7 @@ class Material
 	ID3D11ShaderResourceView* textureSrv;
 	DirectX::XMFLOAT4 color;
 
+	//Static material collection
 	static std::map<std::string, Material*> materials;
 
 public:

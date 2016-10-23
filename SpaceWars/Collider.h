@@ -21,7 +21,7 @@ class Collider
 	Vector3 origin = Vector3(0.0f); //Will store the center point of the Sphere Class
 	Vector3 min = Vector3(0.0f); //Will store the minimum vector of the Sphere Class
 	Vector3 max = Vector3(0.0f); //Will store the maximum vector of the Sphere Class
-	Vector3 lastCollision;
+	Vector3 lastCollision; //last collision position - I think
 	Transform* transform;
 
 	void getMinMax(Vector3& min, Vector3& max, std::vector<XMFLOAT3> points);
@@ -80,8 +80,9 @@ public:
 	*/
 	float getRadius(void);
 
-
+	//Get the min bound of the collider - relative to local origin
 	Vector3 getMin();
+	//Get the max bound of the collider - relative to local origin
 	Vector3 getMax();
 	Vector3 getLastCollision();
 

@@ -22,9 +22,7 @@ void Menu::update(float dt, float tt)
 	}
 }
 
-
-
-void Menu::draw(float dt, float tt, Renderer* renderer) {
+void Menu::draw(float deltaTime, float totalTime, Renderer* renderer) {
 	SpriteBatch* spriteBatch = renderer->getSpriteBatch();
 	SpriteFont* spriteFont = renderer->getSpriteFont();
 

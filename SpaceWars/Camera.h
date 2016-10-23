@@ -16,18 +16,24 @@ public:
 	Camera(float aspectRatio);
 	~Camera();
 
-	void Update(double deltaTime, double elapsedTime);
+	//update camera properties
+	void update(double deltaTime, double elapsedTime);
 
 	void setAspectRatio(float aspectRatio);
 
+	//update the view matrix if it's stale
 	void updateViewMatrix();
 
+	//Move along local Z axis
 	void advance(float units);
 
+	//Move along local X axis
 	void strafe(float units);
 
+	//Move along local Y axis
 	void ascend(float units);
 
+	//Rotate by X/Y radians
 	void rotate(float x, float y);
 
 	Transform* getTransform() {

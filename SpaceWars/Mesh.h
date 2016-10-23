@@ -26,11 +26,11 @@ public:
 	Mesh(char* modelName, ID3D11Device* device);
 	~Mesh();
 
-	void InitBuffers(UINT* indices, Vertex* verticies, int indexCount, int vertexCount, ID3D11Device* device);
-	ID3D11Buffer* GetVertexBuffer();
-	ID3D11Buffer* GetIndexBuffer();
+	void initBuffers(UINT* indices, Vertex* verticies, int indexCount, int vertexCount, ID3D11Device* device);
+	ID3D11Buffer* getVertexBuffer();
+	ID3D11Buffer* getIndexBuffer();
 	std::vector<XMFLOAT3> getVertices();
-	int GetIndexCount();
+	int getIndexCount();
 
 	//Mesh Managment
 	static void loadMeshes(ID3D11Device* device);

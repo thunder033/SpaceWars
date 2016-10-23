@@ -25,15 +25,15 @@ void Space::init()
 	entities[0]->getTransform()->SetPosition(1.5f, 0, 0);
 }
 
-void Space::update(float dt, float tt)
+void Space::update(float deltaTime, float totalTime)
 {
 	//Make the cone orbit
-	entities[0]->getTransform()->SetPosition(cos(tt), sin(tt), 0);
-	entities[0]->getTransform()->SetRotation(0, 0, tt);
+	entities[0]->getTransform()->SetPosition(cos(totalTime), sin(totalTime), 0);
+	entities[0]->getTransform()->SetRotation(0, 0, totalTime);
 
 	//Spinning Cube
-	entities[1]->getTransform()->SetPosition(0, sin(tt), -2);
-	entities[1]->getTransform()->SetRotation(sin(tt) * 3.14f, sin(tt) * 3.14f, sin(tt) * 3.14f);
+	entities[1]->getTransform()->SetPosition(0, sin(totalTime), -2);
+	entities[1]->getTransform()->SetRotation(sin(totalTime) * 3.14f, sin(totalTime) * 3.14f, sin(totalTime) * 3.14f);
 
 	//Move stuff out of the way
 	entities[2]->getTransform()->SetPosition(-2, 0, 0);
@@ -42,10 +42,10 @@ void Space::update(float dt, float tt)
 
 	//Make the Torus spin
 	entities[5]->getTransform()->SetPosition(4, 0, 0);
-	entities[5]->getTransform()->SetRotation(tt * 3, 0, tt * 3);
+	entities[5]->getTransform()->SetRotation(totalTime * 3, 0, totalTime * 3);
 	entities[5]->getTransform()->SetScale(2, 2, 2);
 }
 
-void Space::draw(float dt, float tt, Renderer* renderer) {
+void Space::draw(float deltaTime, float totalTime, Renderer* renderer) {
 
 }

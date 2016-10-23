@@ -21,10 +21,6 @@ public:
 	void Rotate(float x, float y, float z);
 	void Scale(float x, float y, float z);
 
-	/*void Translate(DirectX::XMVECTOR translation);
-	void Rotate(DirectX::XMVECTOR rotation);
-	void Scale(DirectX::XMVECTOR scale);*/
-
 	void SetPosition(float x, float y, float z);
 	void SetScale(float x, float y, float z);
 	void SetRotation(float x, float y, float z);

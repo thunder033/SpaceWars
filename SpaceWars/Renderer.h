@@ -37,11 +37,13 @@ public:
 	Renderer(ID3D11Device* device, ID3D11DeviceContext* context);
 	~Renderer();
 
+	//TODO: implement this
 	void render(Entity* entity, Camera* camera);
 	
 	//Send light data to the pixel shader
 	void setLightData(DirectionalLight* lights);
 
+	//2D sprite rendering for HUD
 	SpriteBatch* getSpriteBatch();
 	SpriteFont* getSpriteFont();
 

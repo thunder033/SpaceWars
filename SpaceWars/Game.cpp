@@ -151,7 +151,7 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	// Background color (Cornflower Blue in this case) for clearing
+	// Background color (Black) for clearing
 	const float color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 	// Clear the render target and depth buffer (erases what's on the screen)
@@ -167,7 +167,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Update the light data
 	renderer->setLightData(lights);
 
-	//context->RSSetState()
 	std::vector<Entity*> entities = Scene::getActive()->getEntities();
 	std::vector<Entity*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
