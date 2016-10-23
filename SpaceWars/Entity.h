@@ -3,13 +3,17 @@
 #include "Mesh.h"
 #include "Material.h"
 #include "Transform.h"
+#include "Collider.h"
 #include <DirectXMath.h>
+
+using namespace DirectX;
 
 class Entity
 {
 	Mesh* mesh;
 	Material* material;
 	Transform* transform;
+	Collider* collider;
 
 public:
 	Entity(Mesh* mesh, Material* material);

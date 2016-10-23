@@ -7,8 +7,8 @@ public:
 	Space();
 	~Space();
 
-	void init(std::vector<Entity*> &entities);
-	void update(float dt, float tt, std::vector<Entity*> &entities);
-	void draw(float dt, float tt, std::vector<Entity*> &entities);
+	void init();
+	void update(float dt, float tt);
+	void draw(float dt, float tt, Renderer* renderer);
 };
 

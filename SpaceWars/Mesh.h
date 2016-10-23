@@ -3,11 +3,14 @@
 #include <fstream>
 #include <vector>
 
+using namespace DirectX;
+
 #pragma once
 class Mesh
 {
 private:
 	// Buffers to hold actual geometry data
+	std::vector<XMFLOAT3> positions;
 	ID3D11Buffer* vertexBuffer;
 	ID3D11Buffer* indexBuffer;
 	int indexCount;
@@ -26,6 +29,7 @@ public:
 	void InitBuffers(UINT* indices, Vertex* verticies, int indexCount, int vertexCount, ID3D11Device* device);
 	ID3D11Buffer* GetVertexBuffer();
 	ID3D11Buffer* GetIndexBuffer();
+	std::vector<XMFLOAT3> getVertices();
 	int GetIndexCount();
 
 	//Mesh Managment

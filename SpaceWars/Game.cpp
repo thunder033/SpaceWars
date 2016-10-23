@@ -40,13 +40,7 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
-	ReleaseEntities();
-
-	//Clean up scenes
-	for (auto kv : scenes) {
-		delete kv.second;
-	}
-
+	Scene::release();
 	Mesh::release();
 	Material::release();
 
@@ -60,29 +54,14 @@ Game::~Game()
 	delete renderer;
 }
 
-void Game::ReleaseEntities()
-{
-	std::vector<Entity*>::iterator it;
-	for (it = entities.begin(); it < entities.end(); it++) {
-		delete *it;
-	}
-
-	entities.clear();
-}
-
-void Game::StartScene(std::string name)
-{
-	ReleaseEntities();
-	activeScene = scenes[name];
-	activeScene->init(entities);
-}
-
 // --------------------------------------------------------
 // Called once per program, after DirectX and the window
 // are initialized but before the game loop.
 // --------------------------------------------------------
 void Game::Init()
 {
+	renderStates = std::make_unique<CommonStates>(device);
+
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
 	renderer = new Renderer(device, context);
 
@@ -101,15 +80,16 @@ void Game::Init()
 		0, //we don't actually need the texture reference
 		&crateSrv);
 
-	//Create materials - maybe should be done with a factory method
+	//Create materials - auto indexed - maybe should be done with a factory method
 	new Material("crate", renderer->getVertexShader(), renderer->getPixelShader(), crateSrv);
 	new Material("blue", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 0.15f, 1, 1), renderer->getDefaultTexture());
 
 	CreateBasicGeometry();
 
-	scenes["menu"] = new Menu();
-	scenes["space"] = new Space();
-	StartScene("space");
+	//Create Scenes - auto indexed - automatically indexed, again maybe w/ factory
+	new Menu();
+	new Space();
+	Scene::setActive("menu");
 
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
@@ -136,9 +116,6 @@ void Game::CreateBasicGeometry()
 	
 	//store the lights in the game
 	lights = new DirectionalLight[2] { light, light2 };
-
-	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(context));
-	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(device, L"Debug/Assets/Textures/font.spritefont"));
 }
 
 
@@ -166,7 +143,7 @@ void Game::Update(float deltaTime, float totalTime)
 
 	camera->Update(deltaTime, totalTime);
 
-	activeScene->update(deltaTime, totalTime, entities);
+	Scene::getActive()->update(deltaTime, totalTime);
 }
 
 // --------------------------------------------------------
@@ -175,7 +152,7 @@ void Game::Update(float deltaTime, float totalTime)
 void Game::Draw(float deltaTime, float totalTime)
 {
 	// Background color (Cornflower Blue in this case) for clearing
-	const float color[4] = {0.4f, 0.6f, 0.75f, 0.0f};
+	const float color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
 	// Clear the render target and depth buffer (erases what's on the screen)
 	//  - Do this ONCE PER FRAME
@@ -190,6 +167,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Update the light data
 	renderer->setLightData(lights);
 
+	//context->RSSetState()
+	std::vector<Entity*> entities = Scene::getActive()->getEntities();
 	std::vector<Entity*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
 		(*it)->prepareMaterial(camera->getViewMatrix(), camera->getProjectionMatrix(), renderer->getSampler());
@@ -217,22 +196,17 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	}
 
-	activeScene->draw(deltaTime, totalTime, entities);
-	//Vector3 cameraRot = camera->getTransform()->GetRotation();
+	Scene::getActive()->draw(deltaTime, totalTime, renderer);
 
-	//spriteBatch->Begin();
-	//std::wstring rot(L"(" + std::to_wstring(cameraRot.x) + L", " + std::to_wstring(cameraRot.y) + L", " + std::to_wstring(cameraRot.z) + L")");
-	//const wchar_t* text = rot.c_str();
-	//spriteFont->DrawString(spriteBatch.get(), text, XMFLOAT2(10, 10));
-	//spriteBatch->End();
+	//Reset Render states
+	context->OMSetBlendState(renderStates->Opaque(), nullptr, 0xFFFFFFFF);
+	context->OMSetDepthStencilState(renderStates->DepthDefault(), 0);
+	context->RSSetState(renderStates->CullCounterClockwise());
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
 	swapChain->Present(0, 0);
-
-
-
 }
 
 

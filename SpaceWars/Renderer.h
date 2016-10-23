@@ -7,6 +7,8 @@
 #include "Camera.h"
 #include "Lights.h"
 #include <DirectXMath.h>
+#include <SpriteFont.h>
+#include <SpriteBatch.h>
 
 using namespace DirectX;
 
@@ -24,6 +26,9 @@ class Renderer
 	ID3D11Texture2D* defaultTexture;
 	ID3D11ShaderResourceView* defaultSrv;
 
+	std::unique_ptr<SpriteBatch> spriteBatch;
+	std::unique_ptr<SpriteFont> spriteFont;
+
 	void loadShaders();
 	void createSampler();
 	void createDefaultMaterial();
@@ -36,6 +41,9 @@ public:
 	
 	//Send light data to the pixel shader
 	void setLightData(DirectionalLight* lights);
+
+	SpriteBatch* getSpriteBatch();
+	SpriteFont* getSpriteFont();
 
 	ID3D11SamplerState* getSampler() {
 		return sampler;

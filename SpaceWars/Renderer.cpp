@@ -88,6 +88,9 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context)
 	loadShaders();
 	createSampler();
 	createDefaultMaterial();
+
+	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(context));
+	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(device, L"Debug/Assets/Textures/font.spritefont"));
 }
 
 
@@ -112,4 +115,14 @@ void Renderer::setLightData(DirectionalLight * lights)
 	//This is currently hard coded for 2 lights
 	pixelShader->SetData("light", &lights[0], sizeof(DirectionalLight));
 	pixelShader->SetData("light2", &lights[1], sizeof(DirectionalLight));
+}
+
+SpriteBatch* Renderer::getSpriteBatch()
+{
+	return spriteBatch.get();
+}
+
+SpriteFont * Renderer::getSpriteFont()
+{
+	return spriteFont.get();
 }

@@ -2,7 +2,7 @@
 
 
 
-Space::Space()
+Space::Space() : Scene("space")
 {
 }
 
@@ -11,7 +11,7 @@ Space::~Space()
 {
 }
 
-void Space::init(std::vector<Entity*> &entities)
+void Space::init()
 {
 	//Create entities to be rendered
 	entities.push_back(new Entity(Mesh::getByIndex(0), Material::getDefault()));
@@ -25,7 +25,7 @@ void Space::init(std::vector<Entity*> &entities)
 	entities[0]->getTransform()->SetPosition(1.5f, 0, 0);
 }
 
-void Space::update(float dt, float tt, std::vector<Entity*> &entities)
+void Space::update(float dt, float tt)
 {
 	//Make the cone orbit
 	entities[0]->getTransform()->SetPosition(cos(tt), sin(tt), 0);
@@ -40,12 +40,12 @@ void Space::update(float dt, float tt, std::vector<Entity*> &entities)
 	entities[3]->getTransform()->SetPosition(-4, 0, 0);
 	entities[4]->getTransform()->SetPosition(4, 0, 0); //sphere
 
-													   //Make the Torus spin
+	//Make the Torus spin
 	entities[5]->getTransform()->SetPosition(4, 0, 0);
 	entities[5]->getTransform()->SetRotation(tt * 3, 0, tt * 3);
 	entities[5]->getTransform()->SetScale(2, 2, 2);
 }
 
-void Space::draw(float dt, float tt, std::vector<Entity*> &entities) {
+void Space::draw(float dt, float tt, Renderer* renderer) {
 
 }

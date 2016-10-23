@@ -17,23 +17,20 @@ void Collider::swap(Collider& other)
 	std::swap(min, other.min);
 	std::swap(max, other.max);
 }
+
 void Collider::release(void)
 {
-	if (transform != nullptr)
-	{
-		delete transform;
-		transform = nullptr;
-	}
+
 }
 
-void Collider::getMinMax(Vector3& min, Vector3& max, std::vector<Vector3> points) {
+void Collider::getMinMax(Vector3& min, Vector3& max, std::vector<XMFLOAT3> points) {
 	if (points.size() == 0)
 		return;
 
 	min = points[0];
 	max = points[0];
 
-	std::vector<Vector3>::iterator it;
+	std::vector<XMFLOAT3>::iterator it;
 	for (it = points.begin(); it != points.end(); ++it)
 	{
 		if (it->x < min.x)
@@ -54,7 +51,7 @@ void Collider::getMinMax(Vector3& min, Vector3& max, std::vector<Vector3> points
 }
 
 //The big 3
-Collider::Collider(std::vector<Vector3> a_lVectorList, Transform* transform)
+Collider::Collider(std::vector<XMFLOAT3> a_lVectorList, Transform* transform)
 {
 	this->transform = transform;
 	getMinMax(min, max, a_lVectorList);

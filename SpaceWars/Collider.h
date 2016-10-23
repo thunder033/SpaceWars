@@ -12,6 +12,8 @@ Date: 2015/10
 #include <algorithm>
 #include <vector>
 
+using namespace DirectX;
+
 //System Class
 class Collider
 {
@@ -22,7 +24,7 @@ class Collider
 	Vector3 lastCollision;
 	Transform* transform;
 
-	void getMinMax(Vector3& min, Vector3& max, std::vector<Vector3> points);
+	void getMinMax(Vector3& min, Vector3& max, std::vector<XMFLOAT3> points);
 public:
 	/*
 	Collider
@@ -30,7 +32,7 @@ public:
 	ARGUMENTS: ---
 	OUTPUT: class object
 	*/
-	Collider(std::vector<Vector3> a_lVectorList, Transform* transform);
+	Collider(std::vector<XMFLOAT3> a_lVectorList, Transform* transform);
 	/*
 	Collider
 	USAGE: Copy Constructor

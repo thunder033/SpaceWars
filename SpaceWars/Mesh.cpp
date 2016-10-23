@@ -1,7 +1,5 @@
 #include "Mesh.h"
 
-using namespace DirectX;
-
 Mesh** Mesh::meshes;
 
 Mesh::Mesh(UINT indices[], Vertex vertices[], int indexCount, int vertexCount, ID3D11Device* device)
@@ -19,7 +17,7 @@ Mesh::Mesh(char* objFile, ID3D11Device* device){
 		return;
 
 	// Variables used while reading the file
-	std::vector<XMFLOAT3> positions;     // Positions from the file
+	//std::vector<XMFLOAT3> positions;     // Positions from the file - class variable now
 	std::vector<XMFLOAT3> normals;       // Normals from the file
 	std::vector<XMFLOAT2> uvs;           // UVs from the file
 	std::vector<Vertex> verts;           // Verts we're assembling
@@ -215,6 +213,11 @@ ID3D11Buffer * Mesh::GetVertexBuffer()
 ID3D11Buffer * Mesh::GetIndexBuffer()
 {
 	return indexBuffer;
+}
+
+std::vector<XMFLOAT3> Mesh::getVertices()
+{
+	return positions;
 }
 
 int Mesh::GetIndexCount()

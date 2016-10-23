@@ -1,12 +1,11 @@
 #include "Entity.h"
 
-
-
 Entity::Entity(Mesh* mesh, Material* material)
 {
 	this->mesh = mesh;
 	this->material = material;
 	transform = new Transform();
+	this->collider = new Collider(mesh->getVertices(), transform);
 }
 
 
@@ -16,6 +15,8 @@ Entity::~Entity()
 		delete transform;
 		transform = nullptr;
 	}
+
+	delete collider;
 }
 
 Mesh * Entity::getMesh()
