@@ -9,6 +9,8 @@
 #include "Lights.h"
 #include "Renderer.h"
 #include <map>
+#include <SpriteFont.h>
+#include <SpriteBatch.h>
 
 class Game 
 	: public DXCore
@@ -37,6 +39,9 @@ private:
 
 	std::vector<Entity*> entities;
 	Renderer* renderer;
+
+	std::unique_ptr<SpriteBatch> spriteBatch;
+	std::unique_ptr<SpriteFont> spriteFont;
 
 	//Meshess
 	const int MESH_COUNT = 6;

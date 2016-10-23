@@ -30,6 +30,10 @@ public:
 
 	void rotate(float x, float y);
 
+	Transform* getTransform() {
+		return transform;
+	}
+
 	DirectX::XMFLOAT4X4 getViewMatrix() {
 		return viewMatrix;
 	}

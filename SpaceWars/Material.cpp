@@ -19,4 +19,5 @@ Material::Material(SimpleVertexShader * vertexShader, SimplePixelShader * pixelS
 
 Material::~Material()
 {
+	
 }

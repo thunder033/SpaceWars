@@ -19,19 +19,19 @@ public:
 
 	virtual ~Material();
 
-	SimpleVertexShader* GetVertexShader() {
+	SimpleVertexShader* getVertexShader() {
 		return vertexShader;
 	};
 
-	SimplePixelShader* GetPixelShader() {
+	SimplePixelShader* getPixelShader() {
 		return pixelShader;
 	}
 
-	ID3D11ShaderResourceView* GetTexture() {
+	ID3D11ShaderResourceView* getTexture() {
 		return textureSrv;
 	}
 
-	DirectX::XMFLOAT4 GetColor() {
+	DirectX::XMFLOAT4 getColor() {
 		return color;
 	}
 };

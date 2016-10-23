@@ -143,7 +143,10 @@ void Game::CreateBasicGeometry()
 	entities.push_back(new Entity(meshes[5], materials["blue"]));
 
 	//move the first mesh to an arbitrary position
-	entities[0]->GetTransform()->SetPosition(1.5f, 0, 0);
+	entities[0]->getTransform()->SetPosition(1.5f, 0, 0);
+
+	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(context));
+	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(device, L"Debug/Assets/Textures/font.spritefont"));
 }
 
 
@@ -172,22 +175,22 @@ void Game::Update(float deltaTime, float totalTime)
 	camera->Update(deltaTime, totalTime);
 
 	//Make the cone orbit
-	entities[0]->GetTransform()->SetPosition(cos(totalTime), sin(totalTime), 0);
-	entities[0]->GetTransform()->SetRotation(0, 0, totalTime);
+	entities[0]->getTransform()->SetPosition(cos(totalTime), sin(totalTime), 0);
+	entities[0]->getTransform()->SetRotation(0, 0, totalTime);
 
 	//Spinning Cube
-	entities[1]->GetTransform()->SetPosition(0, sin(totalTime), -2);
-	entities[1]->GetTransform()->SetRotation(sin(totalTime) * 3.14f, sin(totalTime) * 3.14f, sin(totalTime) * 3.14f);
+	entities[1]->getTransform()->SetPosition(0, sin(totalTime), -2);
+	entities[1]->getTransform()->SetRotation(sin(totalTime) * 3.14f, sin(totalTime) * 3.14f, sin(totalTime) * 3.14f);
 
 	//Move stuff out of the way
-	entities[2]->GetTransform()->SetPosition(-2, 0, 0);
-	entities[3]->GetTransform()->SetPosition(-4, 0, 0);
-	entities[4]->GetTransform()->SetPosition(4, 0, 0); //sphere
+	entities[2]->getTransform()->SetPosition(-2, 0, 0);
+	entities[3]->getTransform()->SetPosition(-4, 0, 0);
+	entities[4]->getTransform()->SetPosition(4, 0, 0); //sphere
 
 	//Make the Torus spin
-	entities[5]->GetTransform()->SetPosition(4, 0, 0);
-	entities[5]->GetTransform()->SetRotation(totalTime * 3, 0, totalTime * 3);
-	entities[5]->GetTransform()->SetScale(2, 2, 2);
+	entities[5]->getTransform()->SetPosition(4, 0, 0);
+	entities[5]->getTransform()->SetRotation(totalTime * 3, 0, totalTime * 3);
+	entities[5]->getTransform()->SetScale(2, 2, 2);
 }
 
 // --------------------------------------------------------
@@ -208,16 +211,12 @@ void Game::Draw(float deltaTime, float totalTime)
 		1.0f,
 		0);
 
-	Material* baseMaterial = renderer->getDefaultMaterial();
+	//Update the light data
+	renderer->setLightData(lights);
+
 	std::vector<Entity*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
-
-		//Register lights throught the default material
-		//This works becuase we only have one pixel shader - pretty hacky
-		baseMaterial->GetPixelShader()->SetData("light", &lights[0], sizeof(DirectionalLight));
-		baseMaterial->GetPixelShader()->SetData("light2", &lights[1], sizeof(DirectionalLight));
-
-		(*it)->PrepareMaterial(camera->getViewMatrix(), camera->getProjectionMatrix(), renderer->getSampler());
+		(*it)->prepareMaterial(camera->getViewMatrix(), camera->getProjectionMatrix(), renderer->getSampler());
 
 		// Set buffers in the input assembler
 		//  - Do this ONCE PER OBJECT you're drawing, since each object might
@@ -225,7 +224,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		UINT stride = sizeof(Vertex);
 		UINT offset = 0;
 
-		Mesh* mesh = (*it)->GetMesh();
+		Mesh* mesh = (*it)->getMesh();
 		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
 		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		context->IASetIndexBuffer(mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
@@ -242,10 +241,21 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	}
 
+	//Vector3 cameraRot = camera->getTransform()->GetRotation();
+
+	//spriteBatch->Begin();
+	//std::wstring rot(L"(" + std::to_wstring(cameraRot.x) + L", " + std::to_wstring(cameraRot.y) + L", " + std::to_wstring(cameraRot.z) + L")");
+	//const wchar_t* text = rot.c_str();
+	//spriteFont->DrawString(spriteBatch.get(), text, XMFLOAT2(10, 10));
+	//spriteBatch->End();
+
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
 	swapChain->Present(0, 0);
+
+
+
 }
 
 

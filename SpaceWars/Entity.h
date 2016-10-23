@@ -15,10 +15,16 @@ public:
 	Entity(Mesh* mesh, Material* material);
 	virtual ~Entity();
 
-	Mesh* GetMesh();
-	Transform* GetTransform();
-	void PrepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler);
+	//Return the mesh for this entity
+	Mesh* getMesh();
 
-	DirectX::XMFLOAT4X4 GetDrawMatrix();
+	//Return this entity's transform
+	Transform* getTransform();
+
+	//Send data from this entity to the GPU
+	void prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler);
+
+	//Calculate the world matrix transpose for this entity
+	DirectX::XMFLOAT4X4 getDrawMatrix();
 };
 

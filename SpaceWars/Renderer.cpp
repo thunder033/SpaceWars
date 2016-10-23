@@ -103,6 +103,14 @@ Renderer::~Renderer()
 	defaultTexture->Release();
 }
 
-void Renderer::Render(Entity * entity, Camera * camera)
+void Renderer::render(Entity * entity, Camera * camera)
 {
+	//Material material = entity->getMaterial();
+}
+
+void Renderer::setLightData(DirectionalLight * lights)
+{
+	//This is currently hard coded for 2 lights
+	pixelShader->SetData("light", &lights[0], sizeof(DirectionalLight));
+	pixelShader->SetData("light2", &lights[1], sizeof(DirectionalLight));
 }

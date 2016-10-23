@@ -18,17 +18,17 @@ Entity::~Entity()
 	}
 }
 
-Mesh * Entity::GetMesh()
+Mesh * Entity::getMesh()
 {
 	return mesh;
 }
 
-Transform * Entity::GetTransform()
+Transform * Entity::getTransform()
 {
 	return transform;
 }
 
-DirectX::XMFLOAT4X4 Entity::GetDrawMatrix()
+DirectX::XMFLOAT4X4 Entity::getDrawMatrix()
 {
 	DirectX::XMMATRIX W = DirectX::XMLoadFloat4x4(&transform->GetMatrix());
 	DirectX::XMFLOAT4X4 matrix;
@@ -36,33 +36,33 @@ DirectX::XMFLOAT4X4 Entity::GetDrawMatrix()
 	return matrix;
 }
 
-void Entity::PrepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler)
+void Entity::prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler)
 {
 	// Send data to shader variables
 	//  - Do this ONCE PER OBJECT you're drawing
 	//  - This is actually a complex process of copying data to a local buffer
 	//    and then copying that entire buffer to the GPU.  
 	//  - The "SimpleShader" class handles all of that for you.
-	material->GetVertexShader()->SetMatrix4x4("world", GetDrawMatrix());
-	material->GetVertexShader()->SetMatrix4x4("view", viewMatrix);
-	material->GetVertexShader()->SetMatrix4x4("projection", projectionMatrix);
+	material->getVertexShader()->SetMatrix4x4("world", getDrawMatrix());
+	material->getVertexShader()->SetMatrix4x4("view", viewMatrix);
+	material->getVertexShader()->SetMatrix4x4("projection", projectionMatrix);
 
-	material->GetPixelShader()->SetData("Color", &material->GetColor(), sizeof(DirectX::XMFLOAT4));
+	material->getPixelShader()->SetData("Color", &material->getColor(), sizeof(DirectX::XMFLOAT4));
 
-	material->GetPixelShader()->SetSamplerState("Sampler", sampler);
-	material->GetPixelShader()->SetShaderResourceView("Texture", material->GetTexture());
+	material->getPixelShader()->SetSamplerState("Sampler", sampler);
+	material->getPixelShader()->SetShaderResourceView("Texture", material->getTexture());
 
 	// Once you've set all of the data you care to change for
 	// the next draw call, you need to actually send it to the GPU
 	//  - If you skip this, the "SetMatrix" calls above won't make it to the GPU!
-	material->GetVertexShader()->CopyAllBufferData();
-	material->GetPixelShader()->CopyAllBufferData();
+	material->getVertexShader()->CopyAllBufferData();
+	material->getPixelShader()->CopyAllBufferData();
 
 	// Set the vertex and pixel shaders to use for the next Draw() command
 	//  - These don't technically need to be set every frame...YET
 	//  - Once you start applying different shaders to different objects,
 	//    you'll need to swap the current shaders before each draw
-	material->GetVertexShader()->SetShader();
-	material->GetPixelShader()->SetShader();
+	material->getVertexShader()->SetShader();
+	material->getPixelShader()->SetShader();
 
 }

@@ -5,6 +5,7 @@
 #include "Material.h"
 #include "Entity.h"
 #include "Camera.h"
+#include "Lights.h"
 #include <DirectXMath.h>
 
 using namespace DirectX;
@@ -32,7 +33,10 @@ public:
 	Renderer(ID3D11Device* device, ID3D11DeviceContext* context);
 	~Renderer();
 
-	void Render(Entity* entity, Camera* camera);
+	void render(Entity* entity, Camera* camera);
+	
+	//Send light data to the pixel shader
+	void setLightData(DirectionalLight* lights);
 
 	Material* getDefaultMaterial() {
 		return baseMaterial;

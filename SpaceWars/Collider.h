@@ -5,17 +5,24 @@ Date: 2015/10
 ----------------------------------------------*/
 #pragma once
 
+#define NOMINMAX
 #include "Transform.h"
 #include "Collision.hpp"
+#include <memory>
+#include <algorithm>
 #include <vector>
 
 //System Class
 class Collider
 {
 	float radius = 0.0f; //Radius of the Bounding Sphere
+	Vector3 origin = Vector3(0.0f); //Will store the center point of the Sphere Class
+	Vector3 min = Vector3(0.0f); //Will store the minimum vector of the Sphere Class
+	Vector3 max = Vector3(0.0f); //Will store the maximum vector of the Sphere Class
 	Vector3 lastCollision;
 	Transform* transform;
 
+	void getMinMax(Vector3& min, Vector3& max, std::vector<Vector3> points);
 public:
 	/*
 	Collider
@@ -53,7 +60,7 @@ public:
 	other -> object to swap content from
 	OUTPUT: ---
 	*/
-	void Swap(Collider& other);
+	void swap(Collider& other);
 
 	/*
 	GetCenter
@@ -71,6 +78,9 @@ public:
 	*/
 	float getRadius(void);
 
+
+	Vector3 getMin();
+	Vector3 getMax();
 	Vector3 getLastCollision();
 
 	/*
@@ -80,7 +90,7 @@ public:
 	Collider* const a_pOther -> Other object to check collision with
 	OUTPUT: bool -> check of the collision
 	*/
-	std::shared_ptr<Collision> isColliding(Collider* const a_pOther);
+	std::shared_ptr<Collision> isColliding(Collider* const other);
 
 private:
 	/*
@@ -90,4 +100,11 @@ private:
 	OUTPUT: ---
 	*/
 	void release(void);
+	/*
+	Init
+	USAGE: Allocates member fields
+	ARGUMENTS: ---
+	OUTPUT: ---
+	*/
+	void init(void);
 };
