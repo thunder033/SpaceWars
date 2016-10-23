@@ -1,6 +1,9 @@
 #include "Mesh.h"
 
 using namespace DirectX;
+
+Mesh** Mesh::meshes;
+
 Mesh::Mesh(UINT indices[], Vertex vertices[], int indexCount, int vertexCount, ID3D11Device* device)
 {
 	this->InitBuffers(indices, vertices, indexCount, vertexCount, device);
@@ -217,4 +220,34 @@ ID3D11Buffer * Mesh::GetIndexBuffer()
 int Mesh::GetIndexCount()
 {
 	return indexCount;
+}
+
+void Mesh::loadMeshes(ID3D11Device* device)
+{
+	//Load meshes
+	Mesh::meshes = new Mesh*[Mesh::MESH_COUNT] {
+		new Mesh("Debug/Assets/Models/cone.obj", device),
+		new Mesh("Debug/Assets/Models/cube.obj", device),
+		new Mesh("Debug/Assets/Models/cylinder.obj", device),
+		new Mesh("Debug/Assets/Models/helix.obj", device),
+		new Mesh("Debug/Assets/Models/sphere.obj", device),
+		new Mesh("Debug/Assets/Models/torus.obj", device),
+	};
+}
+
+Mesh* Mesh::getByIndex(int index)
+{
+	return Mesh::meshes[index];
+}
+
+void Mesh::release()
+{
+	if (meshes != nullptr) {
+		for (int i = 0; i < MESH_COUNT; i++) {
+			if (meshes[i] != nullptr) {
+				delete meshes[i];
+			}
+		}
+		delete meshes;
+	}
 }

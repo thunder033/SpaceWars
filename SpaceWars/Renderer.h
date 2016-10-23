@@ -23,7 +23,6 @@ class Renderer
 
 	ID3D11Texture2D* defaultTexture;
 	ID3D11ShaderResourceView* defaultSrv;
-	Material* baseMaterial;
 
 	void loadShaders();
 	void createSampler();
@@ -37,10 +36,6 @@ public:
 	
 	//Send light data to the pixel shader
 	void setLightData(DirectionalLight* lights);
-
-	Material* getDefaultMaterial() {
-		return baseMaterial;
-	}
 
 	ID3D11SamplerState* getSampler() {
 		return sampler;

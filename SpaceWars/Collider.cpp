@@ -85,10 +85,7 @@ Collider::~Collider() { release(); };
 
 //Accessors
 Vector3 Collider::getCenter(void) { 
-	return Vector3();
-
-	//TODO: DX center calculation
-	//return Vector3(transform->GetMatrix() * Vector4(origin, 1.0f)); 
+	return transform->GetMatrix().Translation() + origin;
 }
 
 float Collider::getRadius(void) {
@@ -102,17 +99,11 @@ Vector3 Collider::getLastCollision()
 }
 
 Vector3 Collider::getMin() {
-	return Vector3();
-	
-	//TODO: DX min calulation
-	//return Vector3(transform->GetMatrix()[3] + Vector4(min, 1.0f));
+	return transform->GetMatrix().Translation() + min;
 }
 
 Vector3 Collider::getMax() {
-	return Vector3();
-
-	//TODO: DX Max Calculation
-	//return Vector3(transform->GetMatrix()[3] + Vector4(max, 1.0f));
+	return transform->GetMatrix().Translation() + max;
 }
 
 std::shared_ptr<Collision> Collider::isColliding(Collider* const other)

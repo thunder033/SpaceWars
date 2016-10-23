@@ -40,24 +40,15 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
-	std::vector<Entity*>::iterator it;
-	for (it = entities.begin(); it < entities.end(); it++) {
-		delete *it;
-	}
+	ReleaseEntities();
 
-	if (meshes != nullptr) {
-		for (int i = 0; i < MESH_COUNT; i++) {
-			if (meshes[i] != nullptr) {
-				delete meshes[i];
-			}
-		}
-		delete meshes;
-	}
-
-	//Clean up materials
-	for (auto kv : materials) {
+	//Clean up scenes
+	for (auto kv : scenes) {
 		delete kv.second;
 	}
+
+	Mesh::release();
+	Material::release();
 
 	// Delete our simple shader objects, which
 	// will clean up their own internal DirectX stuff
@@ -67,6 +58,23 @@ Game::~Game()
 	crateSrv->Release();
 
 	delete renderer;
+}
+
+void Game::ReleaseEntities()
+{
+	std::vector<Entity*>::iterator it;
+	for (it = entities.begin(); it < entities.end(); it++) {
+		delete *it;
+	}
+
+	entities.clear();
+}
+
+void Game::StartScene(std::string name)
+{
+	ReleaseEntities();
+	activeScene = scenes[name];
+	activeScene->init(entities);
 }
 
 // --------------------------------------------------------
@@ -83,6 +91,8 @@ void Game::Init()
 	//  - You'll be expanding and/or replacing these later
 	camera->setAspectRatio((float)width / height);
 
+	Mesh::loadMeshes(device);
+
 	//Wood Texture
 	CreateWICTextureFromFile(
 		device, 
@@ -91,10 +101,15 @@ void Game::Init()
 		0, //we don't actually need the texture reference
 		&crateSrv);
 
-	materials["crate"] = new Material(renderer->getVertexShader(), renderer->getPixelShader(), crateSrv);
-	materials["blue"] =  new Material(renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 0.15f, 1, 1), renderer->getDefaultTexture());
+	//Create materials - maybe should be done with a factory method
+	new Material("crate", renderer->getVertexShader(), renderer->getPixelShader(), crateSrv);
+	new Material("blue", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 0.15f, 1, 1), renderer->getDefaultTexture());
 
 	CreateBasicGeometry();
+
+	scenes["menu"] = new Menu();
+	scenes["space"] = new Space();
+	StartScene("space");
 
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
@@ -107,22 +122,11 @@ void Game::Init()
 // --------------------------------------------------------
 void Game::CreateBasicGeometry()
 {
-	//Load meshes
-	meshes = new Mesh*[MESH_COUNT]{
-		new Mesh("Debug/Assets/Models/cone.obj", device),
-		new Mesh("Debug/Assets/Models/cube.obj", device),
-		new Mesh("Debug/Assets/Models/cylinder.obj", device),
-		new Mesh("Debug/Assets/Models/helix.obj", device),
-		new Mesh("Debug/Assets/Models/sphere.obj", device),
-		new Mesh("Debug/Assets/Models/torus.obj", device),
-	};
-
 	//Create the default white-ish light
 	DirectionalLight light = {};
 	light.AmbientColor = DirectX::XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	light.DiffuseColor = DirectX::XMFLOAT4(1.0f, 1.0f, 0.75f, 1.0f);
 	light.Direction = DirectX::XMFLOAT3(1, -1, 0);
-
 
 	//Create secondary red light
 	DirectionalLight light2 = {};
@@ -132,18 +136,6 @@ void Game::CreateBasicGeometry()
 	
 	//store the lights in the game
 	lights = new DirectionalLight[2] { light, light2 };
-
-	//Create entities to be rendered
-	Material* baseMaterial = renderer->getDefaultMaterial();
-	entities.push_back(new Entity(meshes[0], baseMaterial));
-	entities.push_back(new Entity(meshes[1], materials["crate"]));
-	entities.push_back(new Entity(meshes[2], baseMaterial));
-	entities.push_back(new Entity(meshes[3], materials["blue"]));
-	entities.push_back(new Entity(meshes[4], baseMaterial));
-	entities.push_back(new Entity(meshes[5], materials["blue"]));
-
-	//move the first mesh to an arbitrary position
-	entities[0]->getTransform()->SetPosition(1.5f, 0, 0);
 
 	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(context));
 	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(device, L"Debug/Assets/Textures/font.spritefont"));
@@ -174,23 +166,7 @@ void Game::Update(float deltaTime, float totalTime)
 
 	camera->Update(deltaTime, totalTime);
 
-	//Make the cone orbit
-	entities[0]->getTransform()->SetPosition(cos(totalTime), sin(totalTime), 0);
-	entities[0]->getTransform()->SetRotation(0, 0, totalTime);
-
-	//Spinning Cube
-	entities[1]->getTransform()->SetPosition(0, sin(totalTime), -2);
-	entities[1]->getTransform()->SetRotation(sin(totalTime) * 3.14f, sin(totalTime) * 3.14f, sin(totalTime) * 3.14f);
-
-	//Move stuff out of the way
-	entities[2]->getTransform()->SetPosition(-2, 0, 0);
-	entities[3]->getTransform()->SetPosition(-4, 0, 0);
-	entities[4]->getTransform()->SetPosition(4, 0, 0); //sphere
-
-	//Make the Torus spin
-	entities[5]->getTransform()->SetPosition(4, 0, 0);
-	entities[5]->getTransform()->SetRotation(totalTime * 3, 0, totalTime * 3);
-	entities[5]->getTransform()->SetScale(2, 2, 2);
+	activeScene->update(deltaTime, totalTime, entities);
 }
 
 // --------------------------------------------------------
@@ -241,6 +217,7 @@ void Game::Draw(float deltaTime, float totalTime)
 
 	}
 
+	activeScene->draw(deltaTime, totalTime, entities);
 	//Vector3 cameraRot = camera->getTransform()->GetRotation();
 
 	//spriteBatch->Begin();

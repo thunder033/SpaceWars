@@ -8,6 +8,9 @@
 #include "Camera.h"
 #include "Lights.h"
 #include "Renderer.h"
+#include "Scene.h"
+#include "Menu.h"
+#include "Space.h"
 #include <map>
 #include <SpriteFont.h>
 #include <SpriteBatch.h>
@@ -32,6 +35,10 @@ public:
 	void OnMouseUp	 (WPARAM buttonState, int x, int y);
 	void OnMouseMove (WPARAM buttonState, int x, int y);
 	void OnMouseWheel(float wheelDelta,   int x, int y);
+
+	// Game
+	void StartScene(std::string sceneName);
+	void ReleaseEntities();
 private:
 
 	// Initialization helper methods - feel free to customize, combine, etc.
@@ -43,17 +50,16 @@ private:
 	std::unique_ptr<SpriteBatch> spriteBatch;
 	std::unique_ptr<SpriteFont> spriteFont;
 
-	//Meshess
-	const int MESH_COUNT = 6;
-	Mesh** meshes;
-
 	//Textures
 	ID3D11ShaderResourceView* crateSrv;
 
 	//Rendering Data
-	std::map<std::string, Material*> materials;
 	Camera* camera;
 	DirectionalLight* lights;
+
+	//Game
+	Scene* activeScene;
+	std::map<std::string, Scene*> scenes;
 
 	// Keeps track of the old mouse position.  Useful for 
 	// determining how far the mouse moved in a single frame.

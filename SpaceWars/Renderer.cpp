@@ -1,7 +1,7 @@
 #include "Renderer.h"
 
 
-
+//TODO: move this into the material class
 void Renderer::createDefaultMaterial()
 {
 	unsigned char textureColor[] = { 255, 255, 255, 255 };
@@ -32,7 +32,7 @@ void Renderer::createDefaultMaterial()
 	device->CreateTexture2D(&defaultTextureDesc, &defaultTextureInitData, &defaultTexture);
 	device->CreateShaderResourceView(defaultTexture, NULL, &defaultSrv);
 
-	baseMaterial = new Material(vertexShader, pixelShader, defaultSrv);
+	new Material("default", vertexShader, pixelShader, defaultSrv);
 }
 
 // --------------------------------------------------------
@@ -96,7 +96,6 @@ Renderer::~Renderer()
 {
 	delete vertexShader;
 	delete pixelShader;
-	delete baseMaterial;
 
 	sampler->Release();
 	defaultSrv->Release();
