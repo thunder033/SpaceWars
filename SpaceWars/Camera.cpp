@@ -36,7 +36,7 @@ Camera::~Camera()
 	}
 }
 
-void Camera::Update(double deltaTime, double elapsedTime)
+void Camera::update(double deltaTime, double elapsedTime)
 {
 	float speed = 15.0f;
 	if (GetAsyncKeyState('W') & 0x8000) {

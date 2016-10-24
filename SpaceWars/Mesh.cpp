@@ -4,7 +4,7 @@ Mesh** Mesh::meshes;
 
 Mesh::Mesh(UINT indices[], Vertex vertices[], int indexCount, int vertexCount, ID3D11Device* device)
 {
-	this->InitBuffers(indices, vertices, indexCount, vertexCount, device);
+	this->initBuffers(indices, vertices, indexCount, vertexCount, device);
 }
 
 Mesh::Mesh(char* objFile, ID3D11Device* device){
@@ -150,10 +150,10 @@ Mesh::Mesh(char* objFile, ID3D11Device* device){
 	//
 	// - "vertCounter" is BOTH the number of vertices and the number of indices
 	// - Yes, the indices are a bit redundant here (one per vertex)
-	this->InitBuffers(&indices[0], &verts[0], vertCounter, vertCounter, device);
+	this->initBuffers(&indices[0], &verts[0], vertCounter, vertCounter, device);
 }
 
-void Mesh::InitBuffers(UINT* indices, Vertex* vertices, int indexCount, int vertexCount, ID3D11Device* device) {
+void Mesh::initBuffers(UINT* indices, Vertex* vertices, int indexCount, int vertexCount, ID3D11Device* device) {
 	this->indexCount = indexCount;
 
 	// Create the VERTEX BUFFER description -----------------------------------
@@ -205,12 +205,12 @@ Mesh::~Mesh()
 	if (indexBuffer) { indexBuffer->Release(); }
 }
 
-ID3D11Buffer * Mesh::GetVertexBuffer()
+ID3D11Buffer * Mesh::getVertexBuffer()
 {
 	return vertexBuffer;
 }
 
-ID3D11Buffer * Mesh::GetIndexBuffer()
+ID3D11Buffer * Mesh::getIndexBuffer()
 {
 	return indexBuffer;
 }
@@ -220,7 +220,7 @@ std::vector<XMFLOAT3> Mesh::getVertices()
 	return positions;
 }
 
-int Mesh::GetIndexCount()
+int Mesh::getIndexCount()
 {
 	return indexCount;
 }

@@ -37,7 +37,7 @@ public:
 private:
 
 	// Initialization helper methods - feel free to customize, combine, etc.
-	void CreateBasicGeometry();
+	void CreateLights();
 
 	Renderer* renderer;
 	std::unique_ptr<DirectX::CommonStates> renderStates;

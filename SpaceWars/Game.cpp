@@ -60,16 +60,16 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
+	//Get some common render states from DTK
 	renderStates = std::make_unique<CommonStates>(device);
 
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
 	renderer = new Renderer(device, context);
 
-	// Helper methods for loading shaders, creating some basic
-	// geometry to draw and some simple camera matrices.
-	//  - You'll be expanding and/or replacing these later
+	//setup the camera
 	camera->setAspectRatio((float)width / height);
 
+	//Load meshes
 	Mesh::loadMeshes(device);
 
 	//Wood Texture
@@ -84,7 +84,7 @@ void Game::Init()
 	new Material("crate", renderer->getVertexShader(), renderer->getPixelShader(), crateSrv);
 	new Material("blue", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 0.15f, 1, 1), renderer->getDefaultTexture());
 
-	CreateBasicGeometry();
+	CreateLights();
 
 	//Create Scenes - auto indexed - automatically indexed, again maybe w/ factory
 	new Menu();
@@ -100,7 +100,7 @@ void Game::Init()
 // --------------------------------------------------------
 // Creates the geometry we're going to draw - a single triangle for now
 // --------------------------------------------------------
-void Game::CreateBasicGeometry()
+void Game::CreateLights()
 {
 	//Create the default white-ish light
 	DirectionalLight light = {};
@@ -141,7 +141,7 @@ void Game::Update(float deltaTime, float totalTime)
 	if (GetAsyncKeyState(VK_ESCAPE))
 		Quit();
 
-	camera->Update(deltaTime, totalTime);
+	camera->update(deltaTime, totalTime);
 
 	Scene::getActive()->update(deltaTime, totalTime);
 }
@@ -179,9 +179,9 @@ void Game::Draw(float deltaTime, float totalTime)
 		UINT offset = 0;
 
 		Mesh* mesh = (*it)->getMesh();
-		ID3D11Buffer* vertexBuffer = mesh->GetVertexBuffer();
+		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
 		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		context->IASetIndexBuffer(mesh->GetIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+		context->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 		// Finally do the actual drawing
 		//  - Do this ONCE PER OBJECT you intend to draw
@@ -189,7 +189,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
 		//     vertices in the currently set VERTEX BUFFER
 		context->DrawIndexed(
-			mesh->GetIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
+			mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
 			0,     // Offset to the first index we want to use
 			0);    // Offset to add to each index when looking up vertices
 
