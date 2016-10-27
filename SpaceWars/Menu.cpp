@@ -13,6 +13,7 @@ Menu::~Menu()
 
 void Menu::init()
 {
+	Scene::init();
 }
 
 void Menu::update(float dt, float tt)

@@ -17,9 +17,15 @@ public:
 	Transform();
 	~Transform();
 
+	//Transform by values
 	void Translate(float x, float y, float z);
 	void Rotate(float x, float y, float z);
 	void Scale(float x, float y, float z);
+
+	//Transform by vectors
+	void Translate(Vector3 translation);
+	void Rotate(Vector3 rotation);
+	void Scale(Vector3 scale);
 
 	void SetPosition(float x, float y, float z);
 	void SetScale(float x, float y, float z);

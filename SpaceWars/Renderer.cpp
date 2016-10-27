@@ -105,7 +105,7 @@ Renderer::~Renderer()
 	defaultTexture->Release();
 }
 
-void Renderer::render(Entity * entity, Camera * camera)
+void Renderer::render(GameObject * entity, Camera * camera)
 {
 	//Material material = entity->getMaterial();
 }

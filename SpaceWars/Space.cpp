@@ -14,15 +14,17 @@ Space::~Space()
 void Space::init()
 {
 	//Create entities to be rendered
-	entities.push_back(new Entity(Mesh::getByIndex(0), Material::getDefault()));
-	entities.push_back(new Entity(Mesh::getByIndex(1), Material::getByName("crate")));
-	entities.push_back(new Entity(Mesh::getByIndex(2), Material::getDefault()));
-	entities.push_back(new Entity(Mesh::getByIndex(3), Material::getByName("blue")));
-	entities.push_back(new Entity(Mesh::getByIndex(4), Material::getDefault()));
-	entities.push_back(new Entity(Mesh::getByIndex(5), Material::getByName("blue")));
+	entities.push_back(new GameObject(Mesh::getByIndex(0), Material::getDefault()));
+	entities.push_back(new GameObject(Mesh::getByIndex(1), Material::getByName("crate")));
+	entities.push_back(new GameObject(Mesh::getByIndex(2), Material::getDefault()));
+	entities.push_back(new GameObject(Mesh::getByIndex(3), Material::getByName("blue")));
+	entities.push_back(new GameObject(Mesh::getByIndex(4), Material::getDefault()));
+	entities.push_back(new GameObject(Mesh::getByIndex(5), Material::getByName("blue")));
 
 	//move the first mesh to an arbitrary position
 	entities[0]->getTransform()->SetPosition(1.5f, 0, 0);
+
+	Scene::init();
 }
 
 void Space::update(float deltaTime, float totalTime)

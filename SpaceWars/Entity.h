@@ -1,34 +1,22 @@
 #pragma once
 
-#include "Mesh.h"
-#include "Material.h"
-#include "Transform.h"
-#include "Collider.h"
-#include <DirectXMath.h>
+#include "GameObject.h"
 
-using namespace DirectX;
-
-class Entity
+//class Entity;
+class Entity : GameObject
 {
-	Mesh* mesh;
-	Material* material;
-	Transform* transform;
-	Collider* collider;
+	Vector3 velocity;
+	Vector3 acceleration;
+
+	float drag = 0;
 
 public:
+	Entity();
 	Entity(Mesh* mesh, Material* material);
 	virtual ~Entity();
 
-	//Return the mesh for this entity
-	Mesh* getMesh();
+	virtual void update(float deltaTime);
+	virtual void physicsUpdate(class Octree* octree, float delatTime);
 
-	//Return this entity's transform
-	Transform* getTransform();
-
-	//Send data from this entity to the GPU
-	void prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler);
-
-	//Calculate the world matrix transpose for this entity
-	DirectX::XMFLOAT4X4 getDrawMatrix();
+	void applyForce(Vector3 impulse);
 };
-

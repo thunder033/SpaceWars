@@ -4,6 +4,7 @@
 #include <vector>
 #include "Entity.h"
 #include "Renderer.h"
+#include "Octree.h"
 
 class Scene
 {
@@ -13,7 +14,8 @@ class Scene
 
 protected:
 	std::string name; //Name of the scene
-	std::vector<Entity*> entities; //The collection of entities associated with this scene
+	std::vector<GameObject*> entities; //The collection of entities associated with this scene
+	Octree* octree;
 
 public:
 	Scene(std::string name);
@@ -26,7 +28,7 @@ public:
 	//draw commands for the scene
 	virtual void draw(float deltaTime, float totalTime, Renderer* renderer);
 	//returns the scene's collection of entities
-	std::vector<Entity*> getEntities(); 
+	std::vector<GameObject*> getEntities(); 
 	//Delete all entities for the scene and clear the collection - called when the scene is deactivated
 	void releaseEntities();
 

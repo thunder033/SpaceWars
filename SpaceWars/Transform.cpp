@@ -30,6 +30,21 @@ void Transform::Rotate(float x, float y, float z)
 	SetRotation(Vector3(rotation.x + x, rotation.y + y, rotation.z + z));
 }
 
+void Transform::Translate(Vector3 translation)
+{
+	SetPosition(Vector3(position.x + translation.x, position.y + translation.y, position.z + translation.z));
+}
+
+void Transform::Scale(Vector3 scale)
+{
+	SetScale(Vector3(this->scale.x + scale.x, this->scale.y + scale.y, this->scale.z + scale.z));
+}
+
+void Transform::Rotate(Vector3 rotation)
+{
+	SetRotation(Vector3(this->rotation.x + rotation.x, this->rotation.y + rotation.y, this->rotation.z + rotation.z));
+}
+
 Vector3 Transform::GetPosition()
 {
 	return position;

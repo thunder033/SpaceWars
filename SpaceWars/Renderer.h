@@ -38,7 +38,7 @@ public:
 	~Renderer();
 
 	//TODO: implement this
-	void render(Entity* entity, Camera* camera);
+	void render(GameObject* entity, Camera* camera);
 	
 	//Send light data to the pixel shader
 	void setLightData(DirectionalLight* lights);

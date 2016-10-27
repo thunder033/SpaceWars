@@ -167,8 +167,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Update the light data
 	renderer->setLightData(lights);
 
-	std::vector<Entity*> entities = Scene::getActive()->getEntities();
-	std::vector<Entity*>::iterator it;
+	std::vector<GameObject*> entities = Scene::getActive()->getEntities();
+	std::vector<GameObject*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
 		(*it)->prepareMaterial(camera->getViewMatrix(), camera->getProjectionMatrix(), renderer->getSampler());
 
