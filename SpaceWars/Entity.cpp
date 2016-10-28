@@ -1,5 +1,6 @@
 #include "Entity.h"
 #include "Octree.h"
+#include "Scene.h"
 
 Entity::Entity(Mesh* mesh, Material* material) : GameObject(mesh, material)
 {
@@ -14,7 +15,7 @@ void Entity::update(float deltaTime)
 {
 	GameObject::update(deltaTime);
 	//This is temporary until we have a proper updater
-	physicsUpdate(deltaTime);
+	physicsUpdate(Scene::getActive()->getEntityTree(), deltaTime);
 }
 
 void Entity::applyForce(Vector3 impulse)

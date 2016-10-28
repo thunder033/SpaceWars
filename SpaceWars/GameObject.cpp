@@ -1,6 +1,8 @@
 #include "GameObject.h"
 
-GameObject::GameObject(Mesh* mesh, Material* material)
+int GameObject::autoIncrementId = 0;
+
+GameObject::GameObject(Mesh* mesh, Material* material) : id(autoIncrementId++)
 {
 	this->mesh = mesh;
 	this->material = material;
@@ -29,7 +31,7 @@ Mesh * GameObject::getMesh()
 	return mesh;
 }
 
-Transform * GameObject::getTransform()
+Transform* GameObject::getTransform() const
 {
 	return transform;
 }
@@ -40,6 +42,31 @@ DirectX::XMFLOAT4X4 GameObject::getDrawMatrix()
 	DirectX::XMFLOAT4X4 matrix;
 	DirectX::XMStoreFloat4x4(&matrix, DirectX::XMMatrixTranspose(W)); // Transpose for HLSL!
 	return matrix;
+}
+
+OctNode * GameObject::getOctNode()
+{
+	return parent;
+}
+
+void GameObject::setOctNode(OctNode * parent)
+{
+	this->parent = parent;
+}
+
+ObjectType GameObject::getType()
+{
+	return collisionTest;
+}
+
+const int GameObject::getID()
+{
+	return id;
+}
+
+const Vector3 GameObject::getPosition() const
+{
+	return this->transform->GetPosition();
 }
 
 void GameObject::prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler)
@@ -71,4 +98,13 @@ void GameObject::prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOA
 	material->getVertexShader()->SetShader();
 	material->getPixelShader()->SetShader();
 
+}
+
+void GameObject::addFrameCollision(int id, std::shared_ptr<Collision> collision)
+{
+	frameCollisions[id] = collision;
+}
+
+void GameObject::onCollision(const CollisionEvent &)
+{
 }

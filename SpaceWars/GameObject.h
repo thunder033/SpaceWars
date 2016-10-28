@@ -16,12 +16,11 @@ enum class ObjectType
 
 class GameObject
 {
+	static int autoIncrementId;
 	const int id;
 
 	Mesh* mesh;
 	Material* material;
-	Transform* transform;
-	Collider* collider;
 
 	class OctNode* parent = nullptr;
 
@@ -52,7 +51,7 @@ public:
 	DirectX::XMFLOAT4X4 getDrawMatrix();
 
 	OctNode* getOctNode();
-	void setOctNode(OctNode*);
+	void setOctNode(OctNode* parent);
 
 	virtual ObjectType getType();
 
@@ -77,8 +76,6 @@ public:
 	void rotateTo(Vector3 orientation);
 
 	void rotateTo(Quaternion orientation);
-
-	virtual void update(float deltaTime);
 
 	void addFrameCollision(int id, std::shared_ptr<Collision> collision);
 

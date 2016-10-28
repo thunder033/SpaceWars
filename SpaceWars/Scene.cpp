@@ -49,6 +49,11 @@ void Scene::releaseEntities()
 	entities.clear();
 }
 
+Octree* Scene::getEntityTree()
+{
+	return octree;
+}
+
 //Static Methods
 void Scene::setActive(std::string name)
 {

@@ -31,6 +31,8 @@ public:
 	std::vector<GameObject*> getEntities(); 
 	//Delete all entities for the scene and clear the collection - called when the scene is deactivated
 	void releaseEntities();
+	//Get the octree of entities in the scene
+	Octree* getEntityTree();
 
 	//Static scene state managment - could be moved to a Stage class or something
 	static void setActive(std::string name);
