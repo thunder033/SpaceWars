@@ -33,6 +33,7 @@ public:
 	OUTPUT: class object
 	*/
 	Collider(std::vector<XMFLOAT3> a_lVectorList, Transform* transform);
+	Collider(float radius, Transform* transform);
 	/*
 	Collider
 	USAGE: Copy Constructor
@@ -79,6 +80,11 @@ public:
 	OUTPUT: float -> radius of the Bounding Sphere
 	*/
 	float getRadius(void);
+
+	/*
+	Sets the radius to allow for fudge factors
+	*/
+	void setRadius(float radius);
 
 	//Get the min bound of the collider - relative to local origin
 	Vector3 getMin();
