@@ -11,6 +11,7 @@
 #include "Scene.h"
 #include "Menu.h"
 #include "Space.h"
+#include "GameScene.h"
 #include <map>
 #include <CommonStates.h>
 

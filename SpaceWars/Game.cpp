@@ -88,7 +88,8 @@ void Game::Init()
 
 	//Create Scenes - auto indexed - automatically indexed, again maybe w/ factory
 	new Menu();
-	new Space();
+	//new Space();
+	new GameScene();
 	Scene::setActive("menu");
 
 	// Tell the input assembler stage of the pipeline what kind of
