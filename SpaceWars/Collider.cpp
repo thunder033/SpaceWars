@@ -53,11 +53,20 @@ void Collider::getMinMax(Vector3& min, Vector3& max, std::vector<XMFLOAT3> point
 //The big 3
 Collider::Collider(std::vector<XMFLOAT3> a_lVectorList, Transform* transform)
 {
+	init();
 	this->transform = transform;
 	getMinMax(min, max, a_lVectorList);
 	origin = (min + max) / 2.0f;
 	radius = Vector3::Distance(origin, max);
 }
+
+Collider::Collider(float radius, Transform* transform)
+{
+	init();
+	this->transform = transform;
+	this->radius = radius;
+}
+
 Collider::Collider(Collider const& other)
 {
 	radius = other.radius;
@@ -88,6 +97,11 @@ Vector3 Collider::getCenter(void) {
 float Collider::getRadius(void) {
 	Vector3 scale = transform->GetScale();
 	return radius * std::max(std::max(scale.x, scale.y), scale.z);
+}
+
+void Collider::setRadius(float radius)
+{
+	this->radius = radius;
 }
 
 Vector3 Collider::getLastCollision()

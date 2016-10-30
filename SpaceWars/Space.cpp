@@ -14,15 +14,21 @@ Space::~Space()
 void Space::init()
 {
 	//Create entities to be rendered
-	entities.push_back(new GameObject(Mesh::getByIndex(0), Material::getDefault()));
-	entities.push_back(new GameObject(Mesh::getByIndex(1), Material::getByName("crate")));
-	entities.push_back(new GameObject(Mesh::getByIndex(2), Material::getDefault()));
-	entities.push_back(new GameObject(Mesh::getByIndex(3), Material::getByName("blue")));
-	entities.push_back(new GameObject(Mesh::getByIndex(4), Material::getDefault()));
-	entities.push_back(new GameObject(Mesh::getByIndex(5), Material::getByName("blue")));
+	entities.push_back(new Entity(Mesh::getByIndex(0), Material::getDefault()));
+	entities.push_back(new Entity(Mesh::getByIndex(1), Material::getByName("crate")));
+	entities.push_back(new Entity(Mesh::getByIndex(2), Material::getDefault()));
+	entities.push_back(new Entity(Mesh::getByIndex(3), Material::getByName("blue")));
+	entities.push_back(new Entity(Mesh::getByIndex(4), Material::getDefault()));
+	entities.push_back(new Entity(Mesh::getByIndex(5), Material::getByName("blue")));
 
 	//move the first mesh to an arbitrary position
 	entities[0]->getTransform()->SetPosition(1.5f, 0, 0);
+
+	entities[4]->getTransform()->SetPosition(4, 0, 0); //sphere
+
+	//Fudge the radius for spherical-ish objects
+	entities[4]->GetCollider()->setRadius(.5f);
+	entities[5]->GetCollider()->setRadius(.7f);
 
 	Scene::init();
 }
@@ -40,12 +46,29 @@ void Space::update(float deltaTime, float totalTime)
 	//Move stuff out of the way
 	entities[2]->getTransform()->SetPosition(-2, 0, 0);
 	entities[3]->getTransform()->SetPosition(-4, 0, 0);
-	entities[4]->getTransform()->SetPosition(4, 0, 0); //sphere
 
 	//Make the Torus spin
 	entities[5]->getTransform()->SetPosition(4, 0, 0);
 	entities[5]->getTransform()->SetRotation(totalTime * 3, 0, totalTime * 3);
 	entities[5]->getTransform()->SetScale(2, 2, 2);
+
+	if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
+		entities[4]->translate(Vector3(deltaTime, 0, 0));
+	}
+
+	if (GetAsyncKeyState(VK_LEFT) & 0x8000) {
+		entities[4]->translate(Vector3(-deltaTime, 0, 0));
+	}
+
+	if (GetAsyncKeyState(VK_UP) & 0x8000) {
+		entities[4]->translate(Vector3(0, deltaTime, 0));
+	}
+
+	if (GetAsyncKeyState(VK_DOWN) & 0x8000) {
+		entities[4]->translate(Vector3(0, -deltaTime, 0));
+	}
+
+	Scene::update(deltaTime, totalTime);
 }
 
 void Space::draw(float deltaTime, float totalTime, Renderer* renderer) {

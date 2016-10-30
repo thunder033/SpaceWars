@@ -83,6 +83,8 @@ void Game::Init()
 	//Create materials - auto indexed - maybe should be done with a factory method
 	new Material("crate", renderer->getVertexShader(), renderer->getPixelShader(), crateSrv);
 	new Material("blue", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 0.15f, 1, 1), renderer->getDefaultTexture());
+	new Material("red", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(1, 0.15f, 0.15, 1), renderer->getDefaultTexture());
+	new Material("green", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 1, 0.15, 1), renderer->getDefaultTexture());
 
 	CreateLights();
 
