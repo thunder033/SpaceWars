@@ -8,7 +8,7 @@ class Transform
 {
 	Vector3 position;
 	Vector3 scale;
-	Vector3 rotation;
+	Quaternion rotation;
 
 	Matrix matrix;
 	bool dirty;
@@ -25,6 +25,7 @@ public:
 	//Transform by vectors
 	void Translate(Vector3 translation);
 	void Rotate(Vector3 rotation);
+	void Rotate(Quaternion rotation);
 	void Scale(Vector3 scale);
 
 	void SetPosition(float x, float y, float z);
@@ -33,13 +34,12 @@ public:
 
 	void SetPosition(Vector3 position);
 	void SetScale(Vector3 scale);
-	void SetRotation(Vector3 rotation);
+	void SetRotation(Vector3 orientation);
+	void SetRotation(Quaternion orientation);
 
 	Vector3 GetPosition();
 	Vector3 GetScale();
-	Vector3 GetRotation();
-
-	Quaternion GetOrientation();
+	Quaternion GetRotation();
 
 	Matrix GetMatrix();
 };

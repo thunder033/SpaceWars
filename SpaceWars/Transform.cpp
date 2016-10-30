@@ -6,7 +6,7 @@ Transform::Transform()
 {
 	position = Vector3(0, 0, 0);
 	scale = Vector3(1, 1, 1);
-	rotation = Vector3(0, 0, 0);
+	rotation = Quaternion();
 	dirty = true;
 }
 
@@ -45,6 +45,11 @@ void Transform::Rotate(Vector3 rotation)
 	SetRotation(Vector3(this->rotation.x + rotation.x, this->rotation.y + rotation.y, this->rotation.z + rotation.z));
 }
 
+void Transform::Rotate(Quaternion rotation)
+{
+	SetRotation(this->rotation * rotation);
+}
+
 Vector3 Transform::GetPosition()
 {
 	return position;
@@ -55,11 +60,6 @@ Vector3 Transform::GetScale()
 	return scale;
 }
 
-Vector3 Transform::GetRotation()
-{
-	return rotation;
-}
-
 void Transform::SetPosition(Vector3 position)
 {
 	this->position = position;
@@ -68,7 +68,13 @@ void Transform::SetPosition(Vector3 position)
 
 void Transform::SetRotation(Vector3 rotation)
 {
-	this->rotation = rotation;
+	this->rotation = Quaternion::CreateFromYawPitchRoll(rotation.x, rotation.y, rotation.z);
+	dirty = true;
+}
+
+void Transform::SetRotation(Quaternion orientation)
+{
+	this->rotation = orientation;
 	dirty = true;
 }
 
@@ -93,8 +99,8 @@ void Transform::SetRotation(float x, float y, float z)
 	SetRotation(Vector3(x, y, z));
 }
 
-Quaternion Transform::GetOrientation() {
-	return Quaternion::CreateFromYawPitchRoll(rotation.x, rotation.y, rotation.z);
+Quaternion Transform::GetRotation() {
+	return rotation;
 }
 
 Matrix Transform::GetMatrix()
@@ -108,7 +114,7 @@ Matrix Transform::GetMatrix()
 		//...possibly something to do with the transpose thing
 		matrix = Matrix::Identity
 			* Matrix::CreateScale(scale)
-			* Matrix::CreateFromYawPitchRoll(rotation.x, rotation.y, rotation.z)
+			* Matrix::CreateFromQuaternion(rotation)
 			* Matrix::CreateTranslation(position);
 
 		return matrix;

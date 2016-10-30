@@ -85,10 +85,7 @@ void Camera::updateViewMatrix()
 }
 
 Vector3 Camera::getForward() {
-	Vector3 rotation = transform->GetRotation();
-	//Rotation Quaternion - the camera behaves properly w/ YXZ instead of XYZ
-	Quaternion rot = Quaternion::CreateFromYawPitchRoll(rotation.y, rotation.x, rotation.z);
-	return Vector3::Transform(Vector3(0, 0, 1), rot);
+	return Vector3::Transform(Vector3(0, 0, 1), transform->GetRotation());
 }
 
 //Move the camera forward(+)/back(-) the by the given amount
@@ -120,9 +117,5 @@ void Camera::ascend(float units)
 
 void Camera::rotate(float x, float y)
 {
-	XMFLOAT3 rotation = transform->GetRotation();
-	//I'm not sure why a full rotation is 4*PI instead of 2*PI...
-	//This is probably related to needing to divide rotation by 2 in get forward
-	float TWO_PI = 6.28f; 
-	transform->SetRotation(fmod(rotation.x + x, TWO_PI), fmod(rotation.y + y, TWO_PI), 0);
+	transform->Rotate(Quaternion::CreateFromYawPitchRoll(y, x, 0));
 }
