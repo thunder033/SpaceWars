@@ -66,7 +66,37 @@ const int GameObject::getID()
 
 const Vector3 GameObject::getPosition() const
 {
-	return this->transform->GetPosition();
+	return transform->GetPosition();
+}
+
+const Quaternion GameObject::getRotation() const
+{
+	return transform->GetRotation();
+}
+
+inline void GameObject::rotate(Quaternion rotation)
+{
+	transform->Rotate(rotation);
+}
+
+inline void GameObject::translate(Vector3 translation)
+{
+	transform->Translate(translation);
+}
+
+inline void GameObject::scale(float scalar)
+{
+	transform->Scale(Vector3(scalar));
+}
+
+inline void GameObject::rotateTo(Vector3 orientation)
+{
+	transform->SetRotation(orientation);
+}
+
+inline void GameObject::rotateTo(Quaternion orientation)
+{
+	transform->SetRotation(orientation);
 }
 
 void GameObject::prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler)

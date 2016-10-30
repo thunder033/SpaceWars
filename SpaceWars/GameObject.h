@@ -67,15 +67,15 @@ public:
 
 	//void SetDebugColor(vector3 newColor);
 
-	void rotate(Quaternion rotation);
+	inline void rotate(Quaternion rotation);
 
-	void translate(Vector3 translation);
+	inline void translate(Vector3 translation);
 
-	void scale(float scalar);
+	inline void scale(float scalar);
 
-	void rotateTo(Vector3 orientation);
+	inline void rotateTo(Vector3 orientation);
 
-	void rotateTo(Quaternion orientation);
+	inline void rotateTo(Quaternion orientation);
 
 	void addFrameCollision(int id, std::shared_ptr<Collision> collision);
 
