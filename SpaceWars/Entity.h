@@ -3,7 +3,7 @@
 #include "GameObject.h"
 
 //class Entity;
-class Entity : GameObject
+class Entity : public GameObject
 {
 	Vector3 velocity;
 	Vector3 acceleration;

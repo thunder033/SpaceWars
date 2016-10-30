@@ -16,7 +16,7 @@ Scene::~Scene()
 
 void Scene::init()
 {
-	octree = new Octree(Vector3(-5.0f, -5.0f, -5.0f), Vector3(5.0f, 5.0f, 5.0), 1);
+	octree = new Octree(Vector3(-10.0f, -10.0f, -10.0f), Vector3(10.0f, 10.0f, 10.0), 1);
 	octree->generateTree(entities);
 
 }
@@ -63,6 +63,7 @@ void Scene::setActive(std::string name)
 	
 	activeScene = scenes[name];
 	activeScene->init();
+	activeScene->update(0, 0);
 }
 
 Scene* Scene::getActive()

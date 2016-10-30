@@ -21,6 +21,7 @@ class GameObject
 
 	Mesh* mesh;
 	Material* material;
+	Material* frameMaterial;
 
 	class OctNode* parent = nullptr;
 
@@ -67,15 +68,15 @@ public:
 
 	//void SetDebugColor(vector3 newColor);
 
-	inline void rotate(Quaternion rotation);
+	inline void rotate(Quaternion rotation) { transform->Rotate(rotation); }
 
-	inline void translate(Vector3 translation);
+	inline void translate(Vector3 translation) { transform->Translate(translation); }
 
-	inline void scale(float scalar);
+	inline void scale(float scalar) { transform->Scale(Vector3(scalar)); }
 
-	inline void rotateTo(Vector3 orientation);
+	inline void rotateTo(Vector3 orientation) { transform->SetRotation(orientation); }
 
-	inline void rotateTo(Quaternion orientation);
+	inline void rotateTo(Quaternion orientation) { transform->SetRotation(orientation); }
 
 	void addFrameCollision(int id, std::shared_ptr<Collision> collision);
 
