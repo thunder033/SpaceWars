@@ -20,10 +20,12 @@ void GameScene::init()
 void GameScene::update(float deltaTime, float totalTime)
 {
 	keyboardInput();
+	Scene::update(deltaTime, totalTime);
 }
 
 void GameScene::draw(float deltaTime, float totalTime, Renderer * renderer)
 {
+	Scene::draw(deltaTime, totalTime, renderer);
 }
 
 void GameScene::keyboardInput()
