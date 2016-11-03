@@ -26,6 +26,8 @@ class Renderer
 	ID3D11Texture2D* defaultTexture;
 	ID3D11ShaderResourceView* defaultSrv;
 
+	ID3D11RasterizerState* wireFrameState;
+
 	std::unique_ptr<SpriteBatch> spriteBatch;
 	std::unique_ptr<SpriteFont> spriteFont;
 
@@ -46,6 +48,10 @@ public:
 	//2D sprite rendering for HUD
 	SpriteBatch* getSpriteBatch();
 	SpriteFont* getSpriteFont();
+
+	ID3D11RasterizerState* getWireFrameState() const {
+		return wireFrameState;
+	}
 
 	ID3D11SamplerState* getSampler() {
 		return sampler;

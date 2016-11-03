@@ -91,6 +91,21 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context)
 
 	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(context));
 	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(device, L"Debug/Assets/Textures/font.spritefont"));
+
+	D3D11_RASTERIZER_DESC RSWireFrameDesc;
+	RSWireFrameDesc.FillMode = D3D11_FILL_WIREFRAME;
+	RSWireFrameDesc.CullMode = D3D11_CULL_FRONT;
+	RSWireFrameDesc.FrontCounterClockwise = true;
+	RSWireFrameDesc.DepthBias = false;
+	RSWireFrameDesc.DepthBiasClamp = 0;
+	RSWireFrameDesc.SlopeScaledDepthBias = 0;
+	RSWireFrameDesc.DepthClipEnable = true;
+	RSWireFrameDesc.ScissorEnable = false;
+	RSWireFrameDesc.MultisampleEnable = false;
+	RSWireFrameDesc.AntialiasedLineEnable = false;
+
+	HRESULT created = this->device->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
+	// Assumes that "pDevice" is valid (ID3D11Device*) 
 }
 
 

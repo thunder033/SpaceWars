@@ -20,7 +20,7 @@ void Menu::update(float dt, float tt)
 {
 	if (GetAsyncKeyState(VK_SPACE) & 0x8000) {
 		//Scene::setActive("space");
-		Scene::setActive("gameScene");
+		Scene::setActive("space");
 	}
 }
 

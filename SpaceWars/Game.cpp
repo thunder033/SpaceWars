@@ -90,7 +90,7 @@ void Game::Init()
 
 	//Create Scenes - auto indexed - automatically indexed, again maybe w/ factory
 	new Menu();
-	//new Space();
+	new Space();
 	new GameScene();
 	Scene::setActive("menu");
 
@@ -186,6 +186,7 @@ void Game::Draw(float deltaTime, float totalTime)
 		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
 		context->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
+		context->RSSetState(renderStates->CullCounterClockwise());
 		// Finally do the actual drawing
 		//  - Do this ONCE PER OBJECT you intend to draw
 		//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
@@ -196,6 +197,11 @@ void Game::Draw(float deltaTime, float totalTime)
 			0,     // Offset to the first index we want to use
 			0);    // Offset to add to each index when looking up vertices
 
+		context->RSSetState(renderer->getWireFrameState());
+		context->DrawIndexed(
+			mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
+			0,     // Offset to the first index we want to use
+			0);    // Offset to add to each index when looking up vertices
 	}
 
 	Scene::getActive()->draw(deltaTime, totalTime, renderer);
@@ -203,7 +209,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Reset Render states
 	context->OMSetBlendState(renderStates->Opaque(), nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(renderStates->DepthDefault(), 0);
-	context->RSSetState(renderStates->CullCounterClockwise());
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
