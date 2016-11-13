@@ -112,8 +112,8 @@ void Game::CreateLights()
 	//Create secondary red light
 	DirectionalLight light2 = {};
 	light2.AmbientColor = DirectX::XMFLOAT4(0, 0, 0, 1.0f);
-	light2.DiffuseColor = DirectX::XMFLOAT4(1.0f, 0, 0, 1.0f);
-	light2.Direction = DirectX::XMFLOAT3(-1, 1, 0);
+	light2.DiffuseColor = DirectX::XMFLOAT4(0.3f, 0.3f, 0.18f, 1.0f);
+	light2.Direction = DirectX::XMFLOAT3(0.25f, 1, 0);
 	
 	//store the lights in the game
 	lights = new DirectionalLight[2] { light, light2 };
