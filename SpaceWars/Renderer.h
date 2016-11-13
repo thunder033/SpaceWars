@@ -20,6 +20,7 @@ class Renderer
 	// Wrappers for DirectX shaders to provide simplified functionality
 	SimpleVertexShader* vertexShader;
 	SimplePixelShader* pixelShader;
+	SimplePixelShader * wireframeShader;
 
 	ID3D11SamplerState* sampler;
 
@@ -63,6 +64,10 @@ public:
 
 	SimplePixelShader* getPixelShader() {
 		return pixelShader;
+	}
+
+	SimplePixelShader* getWireframeShader() {
+		return wireframeShader;
 	}
 
 	ID3D11ShaderResourceView* getDefaultTexture() {

@@ -51,6 +51,10 @@ void Renderer::loadShaders()
 	if (!pixelShader->LoadShaderFile(L"Debug/PixelShader.cso"))
 		pixelShader->LoadShaderFile(L"PixelShader.cso");
 
+	wireframeShader = new SimplePixelShader(device, context);
+	if (!wireframeShader->LoadShaderFile(L"Debug/WireframeShader.cso"))
+		wireframeShader->LoadShaderFile(L"WireframeShader.cso");
+
 	// You'll notice that the code above attempts to load each
 	// compiled shader file (.cso) from two different relative paths.
 

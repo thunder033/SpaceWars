@@ -197,7 +197,11 @@ void Game::Draw(float deltaTime, float totalTime)
 			0,     // Offset to the first index we want to use
 			0);    // Offset to add to each index when looking up vertices
 
+		renderer->getWireframeShader()->CopyAllBufferData();
+		renderer->getWireframeShader()->SetShader();
 		context->RSSetState(renderer->getWireFrameState());
+		//DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1);
+		//renderer->getWireframeShader()->SetData("Color", &color, sizeof(DirectX::XMFLOAT4));
 		context->DrawIndexed(
 			mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
 			0,     // Offset to the first index we want to use
