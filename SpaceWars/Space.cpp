@@ -14,7 +14,7 @@ Space::~Space()
 void Space::init()
 {
 	//Create entities to be rendered
-	entities.push_back(new Entity(Mesh::getByIndex(0), Material::getDefault()));
+	entities.push_back(new Entity(Mesh::getByIndex(6), Material::getDefault()));
 	entities.push_back(new Entity(Mesh::getByIndex(1), Material::getByName("crate")));
 	entities.push_back(new Entity(Mesh::getByIndex(2), Material::getDefault()));
 	entities.push_back(new Entity(Mesh::getByIndex(3), Material::getByName("blue")));
@@ -37,7 +37,7 @@ void Space::update(float deltaTime, float totalTime)
 {
 	//Make the cone orbit
 	entities[0]->getTransform()->SetPosition(cos(totalTime), sin(totalTime), 0);
-	entities[0]->getTransform()->SetRotation(0, 0, totalTime);
+	entities[0]->getTransform()->SetRotation(1.57, -totalTime + 1.57, 0);
 
 	//Spinning Cube
 	entities[1]->getTransform()->SetPosition(0, sin(totalTime), -2);

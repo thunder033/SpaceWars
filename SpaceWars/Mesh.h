@@ -17,7 +17,7 @@ private:
 
 	//Mesh Management
 	//TODO: convert this to map based mesh management
-	static const int MESH_COUNT = 6;
+	static const int MESH_COUNT = 7;
 	static Mesh** meshes;
 
 public:

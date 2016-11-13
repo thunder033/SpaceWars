@@ -235,6 +235,7 @@ void Mesh::loadMeshes(ID3D11Device* device)
 		new Mesh("Debug/Assets/Models/helix.obj", device),
 		new Mesh("Debug/Assets/Models/sphere.obj", device),
 		new Mesh("Debug/Assets/Models/torus.obj", device),
+		new Mesh("Debug/Assets/Models/sw-ship.obj", device)
 	};
 }
 
