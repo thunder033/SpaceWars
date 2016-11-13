@@ -83,6 +83,9 @@ void Renderer::createSampler()
 
 Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context)
 {
+	//Get some common render states from DTK
+	renderStates = std::make_unique<CommonStates>(device);
+
 	vertexShader = 0;
 	pixelShader = 0;
 
@@ -124,9 +127,41 @@ Renderer::~Renderer()
 	defaultTexture->Release();
 }
 
-void Renderer::render(GameObject * entity, Camera * camera)
+void Renderer::render(GameObject * gameObject, Camera * camera)
 {
-	//Material material = entity->getMaterial();
+	gameObject->getMaterial()->prepare(camera->getViewMatrix(), camera->getProjectionMatrix(), gameObject->getDrawMatrix(), sampler);
+
+	// Set buffers in the input assembler
+	//  - Do this ONCE PER OBJECT you're drawing, since each object might
+	//    have different geometry.
+	UINT stride = sizeof(Vertex);
+	UINT offset = 0;
+
+	Mesh* mesh = gameObject->getMesh();
+	ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
+	context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	context->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	context->RSSetState(renderStates->CullCounterClockwise());
+	// Finally do the actual drawing
+	//  - Do this ONCE PER OBJECT you intend to draw
+	//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
+	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
+	//     vertices in the currently set VERTEX BUFFER
+	context->DrawIndexed(
+		mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
+		0,     // Offset to the first index we want to use
+		0);    // Offset to add to each index when looking up vertices
+
+	wireframeShader->CopyAllBufferData();
+	wireframeShader->SetShader();
+	context->RSSetState(wireFrameState);
+	//DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1);
+	//renderer->getWireframeShader()->SetData("Color", &color, sizeof(DirectX::XMFLOAT4));
+	context->DrawIndexed(
+		mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
+		0,     // Offset to the first index we want to use
+		0);    // Offset to add to each index when looking up vertices
 }
 
 void Renderer::setLightData(DirectionalLight * lights)

@@ -13,7 +13,6 @@
 #include "Space.h"
 #include "GameScene.h"
 #include <map>
-#include <CommonStates.h>
 
 class Game 
 	: public DXCore
@@ -41,7 +40,6 @@ private:
 	void CreateLights();
 
 	Renderer* renderer;
-	std::unique_ptr<DirectX::CommonStates> renderStates;
 
 	//Textures
 	ID3D11ShaderResourceView* crateSrv;

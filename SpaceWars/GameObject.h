@@ -82,6 +82,8 @@ public:
 
 	virtual void onCollision(const CollisionEvent&);
 
+	Material* getMaterial();
+
 	void render(Matrix, Matrix);
 
 	inline Collider* GetCollider()

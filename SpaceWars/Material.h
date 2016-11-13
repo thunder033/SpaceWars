@@ -35,6 +35,8 @@ public:
 		return textureSrv;
 	}
 
+	void prepare(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, DirectX::XMFLOAT4X4 drawMatrix, ID3D11SamplerState* sampler);
+
 	DirectX::XMFLOAT4 getColor() {
 		return color;
 	}

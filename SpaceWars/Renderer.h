@@ -9,6 +9,7 @@
 #include <DirectXMath.h>
 #include <SpriteFont.h>
 #include <SpriteBatch.h>
+#include <CommonStates.h>
 
 using namespace DirectX;
 
@@ -27,6 +28,7 @@ class Renderer
 	ID3D11Texture2D* defaultTexture;
 	ID3D11ShaderResourceView* defaultSrv;
 
+	std::unique_ptr<DirectX::CommonStates> renderStates;
 	ID3D11RasterizerState* wireFrameState;
 
 	std::unique_ptr<SpriteBatch> spriteBatch;
@@ -41,7 +43,7 @@ public:
 	~Renderer();
 
 	//TODO: implement this
-	void render(GameObject* entity, Camera* camera);
+	void render(GameObject* gameObject, Camera* camera);
 	
 	//Send light data to the pixel shader
 	void setLightData(DirectionalLight* lights);
@@ -72,6 +74,10 @@ public:
 
 	ID3D11ShaderResourceView* getDefaultTexture() {
 		return defaultSrv;
+	}
+
+	CommonStates* getCommonStates() {
+		return renderStates.get();
 	}
 };
 

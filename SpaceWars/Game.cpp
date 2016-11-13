@@ -60,8 +60,6 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
-	//Get some common render states from DTK
-	renderStates = std::make_unique<CommonStates>(device);
 
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
 	renderer = new Renderer(device, context);
@@ -173,46 +171,14 @@ void Game::Draw(float deltaTime, float totalTime)
 	std::vector<GameObject*> entities = Scene::getActive()->getEntities();
 	std::vector<GameObject*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
-		(*it)->prepareMaterial(camera->getViewMatrix(), camera->getProjectionMatrix(), renderer->getSampler());
-
-		// Set buffers in the input assembler
-		//  - Do this ONCE PER OBJECT you're drawing, since each object might
-		//    have different geometry.
-		UINT stride = sizeof(Vertex);
-		UINT offset = 0;
-
-		Mesh* mesh = (*it)->getMesh();
-		ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
-		context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-		context->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-		context->RSSetState(renderStates->CullCounterClockwise());
-		// Finally do the actual drawing
-		//  - Do this ONCE PER OBJECT you intend to draw
-		//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
-		//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
-		//     vertices in the currently set VERTEX BUFFER
-		context->DrawIndexed(
-			mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
-			0,     // Offset to the first index we want to use
-			0);    // Offset to add to each index when looking up vertices
-
-		renderer->getWireframeShader()->CopyAllBufferData();
-		renderer->getWireframeShader()->SetShader();
-		context->RSSetState(renderer->getWireFrameState());
-		//DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1);
-		//renderer->getWireframeShader()->SetData("Color", &color, sizeof(DirectX::XMFLOAT4));
-		context->DrawIndexed(
-			mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
-			0,     // Offset to the first index we want to use
-			0);    // Offset to add to each index when looking up vertices
+		renderer->render(*it, camera);
 	}
 
 	Scene::getActive()->draw(deltaTime, totalTime, renderer);
 
 	//Reset Render states
-	context->OMSetBlendState(renderStates->Opaque(), nullptr, 0xFFFFFFFF);
-	context->OMSetDepthStencilState(renderStates->DepthDefault(), 0);
+	context->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
+	context->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
