@@ -49,7 +49,15 @@ public:
 	virtual void OnMouseUp	 (WPARAM buttonState, int x, int y) { }
 	virtual void OnMouseMove (WPARAM buttonState, int x, int y) { }
 	virtual void OnMouseWheel(float wheelDelta,   int x, int y) { }
-	
+
+	int getWidth() const {
+		return width;
+	}
+
+	int getHeight() const {
+		return height;
+	}
+
 protected:
 	HINSTANCE	hInstance;		// The handle to the application
 	HWND		hWnd;			// The handle to the window itself

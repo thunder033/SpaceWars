@@ -10,23 +10,33 @@
 #include <SpriteFont.h>
 #include <SpriteBatch.h>
 #include <CommonStates.h>
+#include <map>
 
 using namespace DirectX;
+
+#define VS_MAIN "mainVS"
+#define VS_POST_PROCESS "postProcessVS"
+
+#define PS_MAIN "mainPS"
+#define PS_WIREFRAME "wireframePS"
+#define PS_POST_PROCESS "postProcessPS"
 
 class Renderer
 {
 	ID3D11Device*			device;
 	ID3D11DeviceContext*	context;
 
-	// Wrappers for DirectX shaders to provide simplified functionality
-	SimpleVertexShader* vertexShader;
-	SimplePixelShader* pixelShader;
-	SimplePixelShader * wireframeShader;
+	static std::map<std::string, SimpleVertexShader*> vertexShaders;
+	static std::map<std::string, SimplePixelShader*> pixelShaders;
 
 	ID3D11SamplerState* sampler;
 
 	ID3D11Texture2D* defaultTexture;
 	ID3D11ShaderResourceView* defaultSrv;
+	
+	//Post processing
+	ID3D11RenderTargetView* postProcessRTV;
+	ID3D11ShaderResourceView* postProcessSRV;
 
 	std::unique_ptr<DirectX::CommonStates> renderStates;
 	ID3D11RasterizerState* wireFrameState;
@@ -39,7 +49,7 @@ class Renderer
 	void createDefaultMaterial();
 	
 public:
-	Renderer(ID3D11Device* device, ID3D11DeviceContext* context);
+	Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* dxcore);
 	~Renderer();
 
 	//TODO: implement this
@@ -61,15 +71,23 @@ public:
 	}
 
 	SimpleVertexShader* getVertexShader() {
-		return vertexShader;
+		return vertexShaders[VS_MAIN];
 	}
 
 	SimplePixelShader* getPixelShader() {
-		return pixelShader;
+		return pixelShaders[PS_MAIN];
 	}
 
 	SimplePixelShader* getWireframeShader() {
-		return wireframeShader;
+		return pixelShaders[PS_WIREFRAME];
+	}
+
+	static SimpleVertexShader* getVS(std::string name) {
+		return vertexShaders[name];
+	}
+
+	static SimplePixelShader* getPS(std::string name) {
+		return pixelShaders[name];
 	}
 
 	ID3D11ShaderResourceView* getDefaultTexture() {

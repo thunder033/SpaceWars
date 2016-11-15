@@ -1,5 +1,7 @@
 #include "Renderer.h"
 
+std::map<std::string, SimpleVertexShader*> Renderer::vertexShaders;
+std::map<std::string, SimplePixelShader*> Renderer::pixelShaders;
 
 //TODO: move this into the material class
 void Renderer::createDefaultMaterial()
@@ -32,7 +34,7 @@ void Renderer::createDefaultMaterial()
 	device->CreateTexture2D(&defaultTextureDesc, &defaultTextureInitData, &defaultTexture);
 	device->CreateShaderResourceView(defaultTexture, NULL, &defaultSrv);
 
-	new Material("default", vertexShader, pixelShader, defaultSrv);
+	new Material("default", vertexShaders[VS_MAIN], pixelShaders[PS_MAIN], defaultSrv);
 }
 
 // --------------------------------------------------------
@@ -43,17 +45,27 @@ void Renderer::createDefaultMaterial()
 // --------------------------------------------------------
 void Renderer::loadShaders()
 {
-	vertexShader = new SimpleVertexShader(device, context);
-	if (!vertexShader->LoadShaderFile(L"Debug/VertexShader.cso"))
-		vertexShader->LoadShaderFile(L"VertexShader.cso");
+	//Load Vertext Shaders
+	vertexShaders[VS_MAIN] = new SimpleVertexShader(device, context);
+	if (!getVS(VS_MAIN)->LoadShaderFile(L"Debug/VertexShader.cso"))
+		getVS(VS_MAIN)->LoadShaderFile(L"VertexShader.cso");
 
-	pixelShader = new SimplePixelShader(device, context);
-	if (!pixelShader->LoadShaderFile(L"Debug/PixelShader.cso"))
-		pixelShader->LoadShaderFile(L"PixelShader.cso");
+	vertexShaders[VS_POST_PROCESS] = new SimpleVertexShader(device, context);
+	if (!getVS(VS_POST_PROCESS)->LoadShaderFile(L"Debug/PostProcessVS.cso"))
+		getVS(VS_POST_PROCESS)->LoadShaderFile(L"PostProcessVS.cso");
 
-	wireframeShader = new SimplePixelShader(device, context);
-	if (!wireframeShader->LoadShaderFile(L"Debug/WireframeShader.cso"))
-		wireframeShader->LoadShaderFile(L"WireframeShader.cso");
+	//Load Pixel Shaders
+	pixelShaders[PS_MAIN] = new SimplePixelShader(device, context);
+	if (!getPS(PS_MAIN)->LoadShaderFile(L"Debug/PixelShader.cso"))
+		getPS(PS_MAIN)->LoadShaderFile(L"PixelShader.cso");
+
+	pixelShaders[PS_WIREFRAME] = new SimplePixelShader(device, context);
+	if (!getPS(PS_WIREFRAME)->LoadShaderFile(L"Debug/WireframeShader.cso"))
+		getPS(PS_WIREFRAME)->LoadShaderFile(L"WireframeShader.cso");
+
+	pixelShaders[PS_POST_PROCESS] = new SimplePixelShader(device, context);
+	if (!getPS(PS_POST_PROCESS)->LoadShaderFile(L"Debug/PostProcessPS.cso"))
+		getPS(PS_POST_PROCESS)->LoadShaderFile(L"PostProcessPS.cso");
 
 	// You'll notice that the code above attempts to load each
 	// compiled shader file (.cso) from two different relative paths.
@@ -81,13 +93,10 @@ void Renderer::createSampler()
 	device->CreateSamplerState(&samplerDesc, &sampler);
 }
 
-Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context)
+Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* dxcore)
 {
 	//Get some common render states from DTK
 	renderStates = std::make_unique<CommonStates>(device);
-
-	vertexShader = 0;
-	pixelShader = 0;
 
 	this->device = device;
 	this->context = context;
@@ -113,14 +122,26 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context)
 
 	HRESULT created = this->device->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
 	// Assumes that "pDevice" is valid (ID3D11Device*) 
+
+	//Create post process stuff
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = dxcore->getWidth();
+	textureDesc.Height = dxcore->getHeight();
 }
 
 
 
 Renderer::~Renderer()
 {
-	delete vertexShader;
-	delete pixelShader;
+	for (auto kvp : pixelShaders) 
+	{
+		delete kvp.second;
+	}
+
+	for (auto kvp : vertexShaders)
+	{
+		delete kvp.second;
+	}
 
 	sampler->Release();
 	defaultSrv->Release();
@@ -153,8 +174,8 @@ void Renderer::render(GameObject * gameObject, Camera * camera)
 		0,     // Offset to the first index we want to use
 		0);    // Offset to add to each index when looking up vertices
 
-	wireframeShader->CopyAllBufferData();
-	wireframeShader->SetShader();
+	getPS(PS_WIREFRAME)->CopyAllBufferData();
+	getPS(PS_WIREFRAME)->SetShader();
 	context->RSSetState(wireFrameState);
 	//DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1);
 	//renderer->getWireframeShader()->SetData("Color", &color, sizeof(DirectX::XMFLOAT4));
@@ -167,8 +188,8 @@ void Renderer::render(GameObject * gameObject, Camera * camera)
 void Renderer::setLightData(DirectionalLight * lights)
 {
 	//This is currently hard coded for 2 lights
-	pixelShader->SetData("light", &lights[0], sizeof(DirectionalLight));
-	pixelShader->SetData("light2", &lights[1], sizeof(DirectionalLight));
+	getPS(PS_MAIN)->SetData("light", &lights[0], sizeof(DirectionalLight));
+	getPS(PS_MAIN)->SetData("light2", &lights[1], sizeof(DirectionalLight));
 }
 
 SpriteBatch* Renderer::getSpriteBatch()

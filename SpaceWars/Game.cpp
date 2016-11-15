@@ -62,7 +62,7 @@ void Game::Init()
 {
 
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
-	renderer = new Renderer(device, context);
+	renderer = new Renderer(device, context, this);
 
 	//setup the camera
 	camera->setAspectRatio((float)width / height);
