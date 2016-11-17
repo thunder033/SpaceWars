@@ -187,8 +187,8 @@ HRESULT DXCore::InitDirectX()
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapDesc.Flags = 0;
 	swapDesc.OutputWindow = hWnd;
-	swapDesc.SampleDesc.Count = 1;
-	swapDesc.SampleDesc.Quality = 0;
+	swapDesc.SampleDesc.Count = 4;
+	swapDesc.SampleDesc.Quality = 1;
 	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapDesc.Windowed = true;
 
@@ -239,8 +239,14 @@ HRESULT DXCore::InitDirectX()
 	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
-	depthStencilDesc.SampleDesc.Count	= 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.SampleDesc.Count	= 4;
+	depthStencilDesc.SampleDesc.Quality = 1;
+
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	ZeroMemory(&depthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
 
 	// Create the depth buffer and its view, then 
 	// release our reference to the texture
@@ -308,8 +314,8 @@ void DXCore::OnResize()
 	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
-	depthStencilDesc.SampleDesc.Count	= 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.SampleDesc.Count	= 4;
+	depthStencilDesc.SampleDesc.Quality = 1;
 
 	// Create the depth buffer and its view, then 
 	// release our reference to the texture

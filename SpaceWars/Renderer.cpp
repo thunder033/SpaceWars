@@ -118,8 +118,8 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	RSWireFrameDesc.SlopeScaledDepthBias = 0;
 	RSWireFrameDesc.DepthClipEnable = true;
 	RSWireFrameDesc.ScissorEnable = false;
-	RSWireFrameDesc.MultisampleEnable = false;
-	RSWireFrameDesc.AntialiasedLineEnable = false;
+	RSWireFrameDesc.MultisampleEnable = true;
+	RSWireFrameDesc.AntialiasedLineEnable = true;
 
 	HRESULT created = this->device->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
 	// Assumes that "pDevice" is valid (ID3D11Device*) 
