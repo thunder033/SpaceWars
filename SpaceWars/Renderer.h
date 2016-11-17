@@ -25,6 +25,7 @@ class Renderer
 {
 	ID3D11Device*			device;
 	ID3D11DeviceContext*	context;
+	DXCore*					dxcore;
 
 	static std::map<std::string, SimpleVertexShader*> vertexShaders;
 	static std::map<std::string, SimplePixelShader*> pixelShaders;
@@ -61,6 +62,10 @@ public:
 	//2D sprite rendering for HUD
 	SpriteBatch* getSpriteBatch();
 	SpriteFont* getSpriteFont();
+
+	//Rendering Functions
+	void resetPostProcess(ID3D11DepthStencilView* depthStencilView);
+	void postProcess(UINT stride, UINT offset);
 
 	ID3D11RasterizerState* getWireFrameState() const {
 		return wireFrameState;

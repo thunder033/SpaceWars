@@ -165,6 +165,8 @@ void Game::Draw(float deltaTime, float totalTime)
 		1.0f,
 		0);
 
+	renderer->resetPostProcess(depthStencilView);
+
 	//Update the light data
 	renderer->setLightData(lights);
 
@@ -179,6 +181,9 @@ void Game::Draw(float deltaTime, float totalTime)
 	//Reset Render states
 	context->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
+
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	renderer->postProcess(sizeof(Vertex), 0);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it

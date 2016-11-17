@@ -100,6 +100,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 
 	this->device = device;
 	this->context = context;
+	this->dxcore = dxcore;
 
 	loadShaders();
 	createSampler();
@@ -127,6 +128,37 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	textureDesc.Width = dxcore->getWidth();
 	textureDesc.Height = dxcore->getHeight();
+	textureDesc.ArraySize = 1;
+	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+	textureDesc.CPUAccessFlags = 0;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	textureDesc.MipLevels = 1;
+	textureDesc.MiscFlags = 0;
+	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+
+	ID3D11Texture2D* ppTexture;
+	device->CreateTexture2D(&textureDesc, 0, &ppTexture);
+
+	//Create Render Target View
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = textureDesc.Format;
+	rtvDesc.Texture2D.MipSlice = 0;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	device->CreateRenderTargetView(ppTexture, &rtvDesc, &postProcessRTV);
+
+	//Create Shader Resource View
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	srvDesc.Format = textureDesc.Format;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+	device->CreateShaderResourceView(ppTexture, &srvDesc, &postProcessSRV);
+
+	ppTexture->Release();
 }
 
 
@@ -200,4 +232,37 @@ SpriteBatch* Renderer::getSpriteBatch()
 SpriteFont * Renderer::getSpriteFont()
 {
 	return spriteFont.get();
+}
+
+void Renderer::resetPostProcess(ID3D11DepthStencilView* depthStencilView)
+{
+	const float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+	// Clear the render target and depth buffer (erases what's on the screen)
+	context->ClearRenderTargetView(postProcessRTV, color);
+	context->OMSetRenderTargets(1, &postProcessRTV, depthStencilView);
+}
+
+void Renderer::postProcess(UINT stride, UINT offset)
+{
+	// Reset the states!
+	context->RSSetState(0);
+	context->OMSetDepthStencilState(0, 0);
+
+	getVS(VS_POST_PROCESS)->SetShader();
+
+	getPS(PS_POST_PROCESS)->SetShader();
+	getPS(PS_POST_PROCESS)->SetShaderResourceView("Pixels", postProcessSRV);
+	getPS(PS_POST_PROCESS)->SetInt("blurAmount", 3);
+	getPS(PS_POST_PROCESS)->SetFloat("pixelWidth", 1.0f / dxcore->getWidth());
+	getPS(PS_POST_PROCESS)->SetFloat("pixelHeight", 1.0f / dxcore->getHeight());
+	getPS(PS_POST_PROCESS)->CopyAllBufferData();
+
+	ID3D11Buffer* nothing = 0;
+	context->IASetVertexBuffers(0, 1, &nothing, &stride, &offset);
+	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+
+	context->Draw(3, 0);
+
+	getPS(PS_POST_PROCESS)->SetShaderResourceView("Pixels", 0);
 }
