@@ -173,6 +173,38 @@ HRESULT DXCore::InitDirectX()
 	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
+	HRESULT hr1 = D3D11CreateDevice(
+		0,							// Video adapter (physical GPU) to use, or null for default
+		D3D_DRIVER_TYPE_HARDWARE,	// We want to use the hardware (GPU)
+		0,							// Used when doing software rendering
+		deviceFlags,				// Any special options
+		0,							// Optional array of possible verisons we want as fallbacks
+		0,							// The number of fallbacks in the above param
+		D3D11_SDK_VERSION,			// Current version of the SDK
+		&device,
+		&dxFeatureLevel,
+		&context);
+	if (FAILED(hr1)) return hr1;
+
+	UINT sampleCountOut = 1;
+	UINT maxQualityLevelOut = 0;
+	for (UINT sampleCount = 1; sampleCount <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT; sampleCount++)
+	{
+		UINT maxQualityLevel = 0;
+		HRESULT hr = device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, sampleCount, &maxQualityLevel);
+
+		if (maxQualityLevel > 0) 
+		{
+			maxQualityLevel--;
+		}
+
+		if (maxQualityLevel > 0)
+		{
+			sampleCountOut = sampleCount;
+			maxQualityLevelOut = maxQualityLevel;
+		}
+	}
+
 	// Create a description of how our swap
 	// chain should work
 	DXGI_SWAP_CHAIN_DESC swapDesc = {};
@@ -188,7 +220,7 @@ HRESULT DXCore::InitDirectX()
 	swapDesc.Flags = 0;
 	swapDesc.OutputWindow = hWnd;
 	swapDesc.SampleDesc.Count = 4;
-	swapDesc.SampleDesc.Quality = 1;
+	swapDesc.SampleDesc.Quality = 0;
 	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapDesc.Windowed = true;
 
@@ -197,13 +229,13 @@ HRESULT DXCore::InitDirectX()
 
 	// Attempt to initialize DirectX
 	hr = D3D11CreateDeviceAndSwapChain(
-		0,							// Video adapter (physical GPU) to use, or null for default
-		D3D_DRIVER_TYPE_HARDWARE,	// We want to use the hardware (GPU)
-		0,							// Used when doing software rendering
-		deviceFlags,				// Any special options
-		0,							// Optional array of possible verisons we want as fallbacks
-		0,							// The number of fallbacks in the above param
-		D3D11_SDK_VERSION,			// Current version of the SDK
+		0,							
+		D3D_DRIVER_TYPE_HARDWARE,	
+		0,							
+		deviceFlags,				
+		0,							
+		0,							
+		D3D11_SDK_VERSION,			
 		&swapDesc,					// Address of swap chain options
 		&swapChain,					// Pointer to our Swap Chain pointer
 		&device,					// Pointer to our Device pointer
@@ -219,12 +251,17 @@ HRESULT DXCore::InitDirectX()
 		__uuidof(ID3D11Texture2D),
 		(void**)&backBufferTexture);
 
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.Format = swapDesc.BufferDesc.Format;
+	rtvDesc.Texture2D.MipSlice = 0;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+
 	// Now that we have the texture, create a render target view
 	// for the back buffer so we can render into it.  Then release
 	// our local reference to the texture, since we have the view.
 	device->CreateRenderTargetView(
 		backBufferTexture,
-		0,
+		&rtvDesc,
 		&backBufferRTV);
 	backBufferTexture->Release();
 
@@ -240,7 +277,7 @@ HRESULT DXCore::InitDirectX()
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
 	depthStencilDesc.SampleDesc.Count	= 4;
-	depthStencilDesc.SampleDesc.Quality = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
 	ZeroMemory(&depthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
@@ -315,7 +352,7 @@ void DXCore::OnResize()
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
 	depthStencilDesc.SampleDesc.Count	= 4;
-	depthStencilDesc.SampleDesc.Quality = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
 
 	// Create the depth buffer and its view, then 
 	// release our reference to the texture
