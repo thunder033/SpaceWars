@@ -75,11 +75,11 @@ protected:
 	ID3D11Device*			device;
 	ID3D11DeviceContext*	context;
 
-	ID3D11Texture2D* mRenderTarget;
+	ID3D11Texture2D* mOffScreenRT;
 	ID3D11Texture2D* mBackBufferTexture;
 
 	ID3D11RenderTargetView* backBufferRTV;
-	ID3D11RenderTargetView* offScreenRTV;
+	ID3D11RenderTargetView* mOffScreenRTV;
 	ID3D11DepthStencilView* depthStencilView;
 
 	UINT mSampleSize = 4;
