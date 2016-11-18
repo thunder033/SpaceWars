@@ -152,6 +152,9 @@
     <ClInclude Include="GameScene.h">
       <Filter>Header Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="DirectXHelper.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="PixelShader.hlsl">

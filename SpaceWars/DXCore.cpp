@@ -173,7 +173,10 @@ HRESULT DXCore::InitDirectX()
 	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-	HRESULT hr1 = D3D11CreateDevice(
+	// Result variable for below function calls
+	HRESULT hr = S_OK;
+
+	hr = D3D11CreateDevice(
 		0,							// Video adapter (physical GPU) to use, or null for default
 		D3D_DRIVER_TYPE_HARDWARE,	// We want to use the hardware (GPU)
 		0,							// Used when doing software rendering
@@ -184,26 +187,39 @@ HRESULT DXCore::InitDirectX()
 		&device,
 		&dxFeatureLevel,
 		&context);
-	if (FAILED(hr1)) return hr1;
 
-	UINT sampleCountOut = 1;
-	UINT maxQualityLevelOut = 0;
-	for (UINT sampleCount = 1; sampleCount <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT; sampleCount++)
-	{
-		UINT maxQualityLevel = 0;
-		HRESULT hr = device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, sampleCount, &maxQualityLevel);
+	if (FAILED(hr)) return hr;
 
-		if (maxQualityLevel > 0) 
+	const UINT DXGI_FORMAT_MAX = 116;
+	const UINT MAX_SAMPLES_CHECK = 128;
+
+	//https://msdn.microsoft.com/en-us/library/windows/desktop/dn458384.aspx
+	for (UINT i = 1; i < DXGI_FORMAT_MAX; i++) {
+		//MS says this is supposed to be safe_cast, but couldn't find how to make it work
+		DXGI_FORMAT inFormat = static_cast<DXGI_FORMAT>(i);
+		UINT formatSupport = 0;
+		HRESULT hr = device->CheckFormatSupport(inFormat, &formatSupport);
+
+		if ((formatSupport & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE) &&
+			(formatSupport & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET))
 		{
-			maxQualityLevel--;
-		}
 
-		if (maxQualityLevel > 0)
-		{
-			sampleCountOut = sampleCount;
-			maxQualityLevelOut = maxQualityLevel;
 		}
 	}
+
+	for (UINT sampleCount = 1; sampleCount <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT; sampleCount++)
+	{
+		UINT numQualityFlags = 0;
+		HRESULT hr = device->CheckMultisampleQualityLevels(DXGI_FORMAT_R8G8B8A8_UNORM, sampleCount, &numQualityFlags);
+
+		if (SUCCEEDED(hr) && numQualityFlags > 0)
+		{
+			mSampleSize = sampleCount;
+			//mQualityFlags = numQualityFlags;
+		}
+	}
+
+
 
 	// Create a description of how our swap
 	// chain should work
@@ -219,13 +235,10 @@ HRESULT DXCore::InitDirectX()
 	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapDesc.Flags = 0;
 	swapDesc.OutputWindow = hWnd;
-	swapDesc.SampleDesc.Count = 4;
+	swapDesc.SampleDesc.Count = 1;
 	swapDesc.SampleDesc.Quality = 0;
 	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
 	swapDesc.Windowed = true;
-
-	// Result variable for below function calls
-	HRESULT hr = S_OK;
 
 	// Attempt to initialize DirectX
 	hr = D3D11CreateDeviceAndSwapChain(
@@ -245,25 +258,43 @@ HRESULT DXCore::InitDirectX()
 
 	// The above function created the back buffer render target
 	// for us, but we need a reference to it
-	ID3D11Texture2D* backBufferTexture;
+	
 	swapChain->GetBuffer(
 		0,
 		__uuidof(ID3D11Texture2D),
-		(void**)&backBufferTexture);
+		(void**)&mBackBufferTexture);
+	D3D11_TEXTURE2D_DESC renderTargetDesc = {};
 
-	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
-	rtvDesc.Format = swapDesc.BufferDesc.Format;
-	rtvDesc.Texture2D.MipSlice = 0;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
+	ZeroMemory(&renderTargetDesc, sizeof(D3D11_TEXTURE2D_DESC));
+	renderTargetDesc.Width = width;
+	renderTargetDesc.Height = height;
+	renderTargetDesc.MipLevels = 1;
+	renderTargetDesc.ArraySize = 1;
+	renderTargetDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	renderTargetDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+	renderTargetDesc.SampleDesc.Count = mSampleSize;
+	renderTargetDesc.SampleDesc.Quality = mQualityFlags;
+
+	DX::ThrowIfFailed(
+		device->CreateTexture2D(
+			&renderTargetDesc,
+			nullptr,
+			&mRenderTarget)
+	);
+
+	CD3D11_RENDER_TARGET_VIEW_DESC rtvDesc(D3D11_RTV_DIMENSION_TEXTURE2DMS);
+	//D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	//rtvDesc.Format = swapDesc.BufferDesc.Format;
+	//rtvDesc.Texture2D.MipSlice = 0;
+	//rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 
 	// Now that we have the texture, create a render target view
 	// for the back buffer so we can render into it.  Then release
 	// our local reference to the texture, since we have the view.
 	device->CreateRenderTargetView(
-		backBufferTexture,
+		mRenderTarget,
 		&rtvDesc,
 		&backBufferRTV);
-	backBufferTexture->Release();
 
 	// Set up the description of the texture to use for the depth buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -276,8 +307,8 @@ HRESULT DXCore::InitDirectX()
 	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
-	depthStencilDesc.SampleDesc.Count	= 4;
-	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.SampleDesc.Count	= mSampleSize;
+	depthStencilDesc.SampleDesc.Quality = mQualityFlags;
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
 	ZeroMemory(&depthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
@@ -351,8 +382,8 @@ void DXCore::OnResize()
 	depthStencilDesc.BindFlags			= D3D11_BIND_DEPTH_STENCIL;
 	depthStencilDesc.CPUAccessFlags		= 0;
 	depthStencilDesc.MiscFlags			= 0;
-	depthStencilDesc.SampleDesc.Count	= 4;
-	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.SampleDesc.Count	= mSampleSize;
+	depthStencilDesc.SampleDesc.Quality = mQualityFlags;
 
 	// Create the depth buffer and its view, then 
 	// release our reference to the texture

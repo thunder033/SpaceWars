@@ -134,29 +134,29 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	textureDesc.MipLevels = 1;
 	textureDesc.MiscFlags = 0;
-	textureDesc.SampleDesc.Count = 1;
+	textureDesc.SampleDesc.Count = 8;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	ID3D11Texture2D* ppTexture;
-	device->CreateTexture2D(&textureDesc, 0, &ppTexture);
+	DX::ThrowIfFailed(device->CreateTexture2D(&textureDesc, 0, &ppTexture));
 
 	//Create Render Target View
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.Format = textureDesc.Format;
 	rtvDesc.Texture2D.MipSlice = 0;
-	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2DMS;
 
-	device->CreateRenderTargetView(ppTexture, &rtvDesc, &postProcessRTV);
+	DX::ThrowIfFailed(device->CreateRenderTargetView(ppTexture, &rtvDesc, &postProcessRTV));
 
 	//Create Shader Resource View
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 	srvDesc.Format = textureDesc.Format;
 	srvDesc.Texture2D.MipLevels = 1;
 	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
 
-	device->CreateShaderResourceView(ppTexture, &srvDesc, &postProcessSRV);
+	DX::ThrowIfFailed(device->CreateShaderResourceView(ppTexture, &srvDesc, &postProcessSRV));
 
 	ppTexture->Release();
 }
@@ -253,7 +253,7 @@ void Renderer::postProcess(UINT stride, UINT offset)
 
 	getPS(PS_POST_PROCESS)->SetShader();
 	getPS(PS_POST_PROCESS)->SetShaderResourceView("Pixels", postProcessSRV);
-	getPS(PS_POST_PROCESS)->SetInt("blurAmount", 3);
+	getPS(PS_POST_PROCESS)->SetInt("blurAmount", 0);
 	getPS(PS_POST_PROCESS)->SetFloat("pixelWidth", 1.0f / dxcore->getWidth());
 	getPS(PS_POST_PROCESS)->SetFloat("pixelHeight", 1.0f / dxcore->getHeight());
 	getPS(PS_POST_PROCESS)->CopyAllBufferData();
