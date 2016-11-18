@@ -54,7 +54,7 @@ DXCore::DXCore(
 	device = 0;
 	context = 0;
 	swapChain = 0;
-	backBufferRTV = 0;
+	offScreenRTV = 0;
 	depthStencilView = 0;
 
 	// Query performance counter for accurate timing information
@@ -70,7 +70,7 @@ DXCore::~DXCore()
 {
 	// Release all DirectX resources
 	if (depthStencilView) { depthStencilView->Release(); }
-	if (backBufferRTV) { backBufferRTV->Release();}
+	if (offScreenRTV) { offScreenRTV->Release();}
 
 	if (swapChain) { swapChain->Release();}
 	if (context) { context->Release();}
@@ -263,21 +263,24 @@ HRESULT DXCore::InitDirectX()
 		0,
 		__uuidof(ID3D11Texture2D),
 		(void**)&mBackBufferTexture);
-	D3D11_TEXTURE2D_DESC renderTargetDesc = {};
 
-	ZeroMemory(&renderTargetDesc, sizeof(D3D11_TEXTURE2D_DESC));
-	renderTargetDesc.Width = width;
-	renderTargetDesc.Height = height;
-	renderTargetDesc.MipLevels = 1;
-	renderTargetDesc.ArraySize = 1;
-	renderTargetDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	renderTargetDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
-	renderTargetDesc.SampleDesc.Count = mSampleSize;
-	renderTargetDesc.SampleDesc.Quality = mQualityFlags;
+	DX::ThrowIfFailed(device->CreateRenderTargetView(mBackBufferTexture, 0, &backBufferRTV));
+
+	D3D11_TEXTURE2D_DESC offScreenBufferDesc = {};
+
+	ZeroMemory(&offScreenBufferDesc, sizeof(D3D11_TEXTURE2D_DESC));
+	offScreenBufferDesc.Width = width;
+	offScreenBufferDesc.Height = height;
+	offScreenBufferDesc.MipLevels = 1;
+	offScreenBufferDesc.ArraySize = 1;
+	offScreenBufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	offScreenBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
+	offScreenBufferDesc.SampleDesc.Count = mSampleSize;
+	offScreenBufferDesc.SampleDesc.Quality = mQualityFlags;
 
 	DX::ThrowIfFailed(
 		device->CreateTexture2D(
-			&renderTargetDesc,
+			&offScreenBufferDesc,
 			nullptr,
 			&mRenderTarget)
 	);
@@ -294,7 +297,7 @@ HRESULT DXCore::InitDirectX()
 	device->CreateRenderTargetView(
 		mRenderTarget,
 		&rtvDesc,
-		&backBufferRTV);
+		&offScreenRTV);
 
 	// Set up the description of the texture to use for the depth buffer
 	D3D11_TEXTURE2D_DESC depthStencilDesc;
@@ -325,7 +328,7 @@ HRESULT DXCore::InitDirectX()
 
 	// Bind the views to the pipeline, so rendering properly 
 	// uses their underlying textures
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	context->OMSetRenderTargets(1, &offScreenRTV, depthStencilView);
 
 	// Lastly, set up a viewport so we render into
 	// to correct portion of the window
@@ -354,7 +357,7 @@ void DXCore::OnResize()
 {
 	// Release existing DirectX views and buffers
 	if (depthStencilView) { depthStencilView->Release(); }
-	if (backBufferRTV) { backBufferRTV->Release(); }
+	if (offScreenRTV) { offScreenRTV->Release(); }
 
 	// Resize the underlying swap chain buffers
 	swapChain->ResizeBuffers(
@@ -368,7 +371,7 @@ void DXCore::OnResize()
 	// texture, then release our local texture reference
 	ID3D11Texture2D* backBufferTexture;
 	swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBufferTexture));
-	device->CreateRenderTargetView(backBufferTexture, 0, &backBufferRTV);
+	device->CreateRenderTargetView(backBufferTexture, 0, &offScreenRTV);
 	backBufferTexture->Release();
 
 	// Set up the description of the texture to use for the depth buffer
@@ -394,7 +397,7 @@ void DXCore::OnResize()
 
 	// Bind the views to the pipeline, so rendering properly 
 	// uses their underlying textures
-	context->OMSetRenderTargets(1, &backBufferRTV, depthStencilView);
+	context->OMSetRenderTargets(1, &offScreenRTV, depthStencilView);
 
 	// Lastly, set up a viewport so we render into
 	// to correct portion of the window

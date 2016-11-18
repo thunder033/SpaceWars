@@ -36,6 +36,7 @@ class Renderer
 	ID3D11ShaderResourceView* defaultSrv;
 	
 	//Post processing
+	ID3D11Texture2D* ppTexture;
 	ID3D11RenderTargetView* postProcessRTV;
 	ID3D11ShaderResourceView* postProcessSRV;
 
@@ -65,7 +66,7 @@ public:
 
 	//Rendering Functions
 	void resetPostProcess(ID3D11DepthStencilView* depthStencilView);
-	void postProcess(UINT stride, UINT offset);
+	void postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTargetMS);
 
 	ID3D11RasterizerState* getWireFrameState() const {
 		return wireFrameState;

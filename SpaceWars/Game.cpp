@@ -158,12 +158,15 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Clear the render target and depth buffer (erases what's on the screen)
 	//  - Do this ONCE PER FRAME
 	//  - At the beginning of Draw (before drawing *anything*)
-	context->ClearRenderTargetView(backBufferRTV, color);
+	context->ClearRenderTargetView(mOffScreenRTV, color);
 	context->ClearDepthStencilView(
 		depthStencilView, 
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
+
+	renderer->resetPostProcess(depthStencilView);
+	context->OMSetRenderTargets(1, &mOffScreenRTV, depthStencilView);
 
 	//Update the light data
 	renderer->setLightData(lights);
@@ -180,21 +183,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	context->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
 	context->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
 
-	unsigned int sub = D3D11CalcSubresource(0, 0, 1);
-
-	context->ResolveSubresource(
-		mBackBufferTexture,
-		sub,
-		mRenderTarget,
-		sub,
-		DXGI_FORMAT_R8G8B8A8_UNORM
-	);
-
-	//renderer->resetPostProcess(depthStencilView);
-	//context->OMSetRenderTargets(1, &backBufferRTV, 0);
-	//renderer->postProcess(sizeof(Vertex), 0);
-
-	
+	context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	renderer->postProcess(sizeof(Vertex), 0, mOffScreenRT);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it

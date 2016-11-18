@@ -79,6 +79,7 @@ protected:
 	ID3D11Texture2D* mBackBufferTexture;
 
 	ID3D11RenderTargetView* backBufferRTV;
+	ID3D11RenderTargetView* offScreenRTV;
 	ID3D11DepthStencilView* depthStencilView;
 
 	UINT mSampleSize = 4;
