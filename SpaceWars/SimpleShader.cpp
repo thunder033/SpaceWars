@@ -10,7 +10,7 @@
 ISimpleShader::ISimpleShader(ID3D11Device* device, ID3D11DeviceContext* context)
 {
 	// Save the device
-	this->device = device;
+	this->mDevice = device;
 	this->deviceContext = context;
 
 	// Set up fields
@@ -170,7 +170,7 @@ bool ISimpleShader::LoadShaderFile(LPCWSTR shaderFile)
 		newBuffDesc.CPUAccessFlags = 0;
 		newBuffDesc.MiscFlags = 0;
 		newBuffDesc.StructureByteStride = 0;
-		device->CreateBuffer(&newBuffDesc, 0, &constantBuffers[b].ConstantBuffer);
+		mDevice->CreateBuffer(&newBuffDesc, 0, &constantBuffers[b].ConstantBuffer);
 
 		// Set up the data buffer for this constant buffer
 		constantBuffers[b].Size = bufferDesc.Size;
@@ -636,7 +636,7 @@ bool SimpleVertexShader::CreateShader(ID3DBlob* shaderBlob)
 	this->CleanUp();
 
 	// Create the shader from the blob
-	HRESULT result = device->CreateVertexShader(
+	HRESULT result = mDevice->CreateVertexShader(
 		shaderBlob->GetBufferPointer(),
 		shaderBlob->GetBufferSize(),
 		0,
@@ -733,7 +733,7 @@ bool SimpleVertexShader::CreateShader(ID3DBlob* shaderBlob)
 	}
 
 	// Try to create Input Layout
-	HRESULT hr = device->CreateInputLayout(
+	HRESULT hr = mDevice->CreateInputLayout(
 		&inputLayoutDesc[0], 
 		inputLayoutDesc.size(), 
 		shaderBlob->GetBufferPointer(), 
@@ -857,7 +857,7 @@ bool SimplePixelShader::CreateShader(ID3DBlob* shaderBlob)
 	this->CleanUp();
 
 	// Create the shader from the blob
-	HRESULT result = device->CreatePixelShader(
+	HRESULT result = mDevice->CreatePixelShader(
 		shaderBlob->GetBufferPointer(),
 		shaderBlob->GetBufferSize(),
 		0,
@@ -980,7 +980,7 @@ bool SimpleDomainShader::CreateShader(ID3DBlob* shaderBlob)
 	this->CleanUp();
 
 	// Create the shader from the blob
-	HRESULT result = device->CreateDomainShader(
+	HRESULT result = mDevice->CreateDomainShader(
 		shaderBlob->GetBufferPointer(),
 		shaderBlob->GetBufferSize(),
 		0,
@@ -1102,7 +1102,7 @@ bool SimpleHullShader::CreateShader(ID3DBlob* shaderBlob)
 	this->CleanUp();
 
 	// Create the shader from the blob
-	HRESULT result = device->CreateHullShader(
+	HRESULT result = mDevice->CreateHullShader(
 		shaderBlob->GetBufferPointer(),
 		shaderBlob->GetBufferSize(),
 		0,
@@ -1231,7 +1231,7 @@ bool SimpleGeometryShader::CreateShader(ID3DBlob* shaderBlob)
 		return this->CreateShaderWithStreamOut(shaderBlob);
 
 	// Create the shader from the blob
-	HRESULT result = device->CreateGeometryShader(
+	HRESULT result = mDevice->CreateGeometryShader(
 		shaderBlob->GetBufferPointer(),
 		shaderBlob->GetBufferSize(),
 		0,
@@ -1298,7 +1298,7 @@ bool SimpleGeometryShader::CreateShaderWithStreamOut(ID3DBlob* shaderBlob)
 	unsigned int rast = allowStreamOutRasterization ? 0 : D3D11_SO_NO_RASTERIZED_STREAM;
 
 	// Create the shader
-	HRESULT result = device->CreateGeometryShaderWithStreamOutput(
+	HRESULT result = mDevice->CreateGeometryShaderWithStreamOutput(
 		shaderBlob->GetBufferPointer(), // Shader blob pointer
 		shaderBlob->GetBufferSize(),    // Shader blob size
 		&soDecl[0],                     // Stream out declaration
@@ -1342,7 +1342,7 @@ bool SimpleGeometryShader::CreateCompatibleStreamOutBuffer(ID3D11Buffer** buffer
 	desc.Usage               = D3D11_USAGE_DEFAULT;
 
 	// Attempt to create the buffer and return the result
-	HRESULT result = device->CreateBuffer(&desc, 0, buffer);
+	HRESULT result = mDevice->CreateBuffer(&desc, 0, buffer);
 	return (result == S_OK);
 }
 
@@ -1487,7 +1487,7 @@ bool SimpleComputeShader::CreateShader(ID3DBlob* shaderBlob)
 	this->CleanUp();
 
 	// Create the shader from the blob
-	HRESULT result = device->CreateComputeShader(
+	HRESULT result = mDevice->CreateComputeShader(
 		shaderBlob->GetBufferPointer(),
 		shaderBlob->GetBufferSize(),
 		0,

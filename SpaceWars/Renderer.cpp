@@ -31,8 +31,8 @@ void Renderer::createDefaultMaterial()
 
 	//Create the Texture and SRV
 	defaultTexture = nullptr;
-	device->CreateTexture2D(&defaultTextureDesc, &defaultTextureInitData, &defaultTexture);
-	device->CreateShaderResourceView(defaultTexture, NULL, &defaultSrv);
+	mDevice->CreateTexture2D(&defaultTextureDesc, &defaultTextureInitData, &defaultTexture);
+	mDevice->CreateShaderResourceView(defaultTexture, NULL, &defaultSrv);
 
 	new Material("default", vertexShaders[VS_MAIN], pixelShaders[PS_MAIN], defaultSrv);
 }
@@ -46,24 +46,24 @@ void Renderer::createDefaultMaterial()
 void Renderer::loadShaders()
 {
 	//Load Vertext Shaders
-	vertexShaders[VS_MAIN] = new SimpleVertexShader(device, context);
+	vertexShaders[VS_MAIN] = new SimpleVertexShader(mDevice, mContext);
 	if (!getVS(VS_MAIN)->LoadShaderFile(L"Debug/VertexShader.cso"))
 		getVS(VS_MAIN)->LoadShaderFile(L"VertexShader.cso");
 
-	vertexShaders[VS_POST_PROCESS] = new SimpleVertexShader(device, context);
+	vertexShaders[VS_POST_PROCESS] = new SimpleVertexShader(mDevice, mContext);
 	if (!getVS(VS_POST_PROCESS)->LoadShaderFile(L"Debug/PostProcessVS.cso"))
 		getVS(VS_POST_PROCESS)->LoadShaderFile(L"PostProcessVS.cso");
 
 	//Load Pixel Shaders
-	pixelShaders[PS_MAIN] = new SimplePixelShader(device, context);
+	pixelShaders[PS_MAIN] = new SimplePixelShader(mDevice, mContext);
 	if (!getPS(PS_MAIN)->LoadShaderFile(L"Debug/PixelShader.cso"))
 		getPS(PS_MAIN)->LoadShaderFile(L"PixelShader.cso");
 
-	pixelShaders[PS_WIREFRAME] = new SimplePixelShader(device, context);
+	pixelShaders[PS_WIREFRAME] = new SimplePixelShader(mDevice, mContext);
 	if (!getPS(PS_WIREFRAME)->LoadShaderFile(L"Debug/WireframeShader.cso"))
 		getPS(PS_WIREFRAME)->LoadShaderFile(L"WireframeShader.cso");
 
-	pixelShaders[PS_POST_PROCESS] = new SimplePixelShader(device, context);
+	pixelShaders[PS_POST_PROCESS] = new SimplePixelShader(mDevice, mContext);
 	if (!getPS(PS_POST_PROCESS)->LoadShaderFile(L"Debug/PostProcessPS.cso"))
 		getPS(PS_POST_PROCESS)->LoadShaderFile(L"PostProcessPS.cso");
 
@@ -90,7 +90,7 @@ void Renderer::createSampler()
 	samplerDesc.MaxAnisotropy = 16;
 	samplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
 
-	device->CreateSamplerState(&samplerDesc, &sampler);
+	mDevice->CreateSamplerState(&samplerDesc, &sampler);
 }
 
 Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* dxcore)
@@ -98,16 +98,16 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	//Get some common render states from DTK
 	renderStates = std::make_unique<CommonStates>(device);
 
-	this->device = device;
-	this->context = context;
+	this->mDevice = device;
+	this->mContext = context;
 	this->dxcore = dxcore;
 
 	loadShaders();
 	createSampler();
 	createDefaultMaterial();
 
-	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(context));
-	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(device, L"Debug/Assets/Textures/font.spritefont"));
+	spriteBatch = std::unique_ptr<SpriteBatch>(new SpriteBatch(mContext));
+	spriteFont = std::unique_ptr<SpriteFont>(new SpriteFont(mDevice, L"Debug/Assets/Textures/font.spritefont"));
 
 	D3D11_RASTERIZER_DESC RSWireFrameDesc;
 	RSWireFrameDesc.FillMode = D3D11_FILL_WIREFRAME;
@@ -121,7 +121,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	RSWireFrameDesc.MultisampleEnable = true;
 	RSWireFrameDesc.AntialiasedLineEnable = true;
 
-	HRESULT created = this->device->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
+	HRESULT created = mDevice->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
 	// Assumes that "pDevice" is valid (ID3D11Device*) 
 
 	//Create post process stuff
@@ -138,7 +138,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 
-	DX::ThrowIfFailed(device->CreateTexture2D(&textureDesc, 0, &ppTexture));
+	DX::ThrowIfFailed(mDevice->CreateTexture2D(&textureDesc, 0, &ppTexture));
 
 	//Create Render Target View
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -146,7 +146,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	rtvDesc.Texture2D.MipSlice = 0;
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
-	DX::ThrowIfFailed(device->CreateRenderTargetView(ppTexture, &rtvDesc, &postProcessRTV));
+	DX::ThrowIfFailed(mDevice->CreateRenderTargetView(ppTexture, &rtvDesc, &postProcessRTV));
 
 	//Create Shader Resource View
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -155,9 +155,7 @@ Renderer::Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* d
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 
-	DX::ThrowIfFailed(device->CreateShaderResourceView(ppTexture, &srvDesc, &postProcessSRV));
-
-	ppTexture->Release();
+	DX::ThrowIfFailed(mDevice->CreateShaderResourceView(ppTexture, &srvDesc, &postProcessSRV));
 }
 
 
@@ -174,9 +172,16 @@ Renderer::~Renderer()
 		delete kvp.second;
 	}
 
-	sampler->Release();
-	defaultSrv->Release();
-	defaultTexture->Release();
+	if (sampler) { sampler->Release(); }
+	if (defaultSrv) { defaultSrv->Release(); }
+	if (defaultTexture) { defaultTexture->Release(); }
+
+	if (ppTexture) { ppTexture->Release(); }
+	if (postProcessRTV) { postProcessRTV->Release(); }
+	if (postProcessSRV) { postProcessSRV->Release(); }
+
+	if (wireFrameState) { wireFrameState->Release(); }
+
 }
 
 void Renderer::render(GameObject * gameObject, Camera * camera)
@@ -191,26 +196,26 @@ void Renderer::render(GameObject * gameObject, Camera * camera)
 
 	Mesh* mesh = gameObject->getMesh();
 	ID3D11Buffer* vertexBuffer = mesh->getVertexBuffer();
-	context->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
-	context->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	mContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	mContext->IASetIndexBuffer(mesh->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
-	context->RSSetState(renderStates->CullCounterClockwise());
+	mContext->RSSetState(renderStates->CullCounterClockwise());
 	// Finally do the actual drawing
 	//  - Do this ONCE PER OBJECT you intend to draw
 	//  - This will use all of the currently set DirectX "stuff" (shaders, buffers, etc)
 	//  - DrawIndexed() uses the currently set INDEX BUFFER to look up corresponding
 	//     vertices in the currently set VERTEX BUFFER
-	context->DrawIndexed(
+	mContext->DrawIndexed(
 		mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
 		0,     // Offset to the first index we want to use
 		0);    // Offset to add to each index when looking up vertices
 
 	getPS(PS_WIREFRAME)->CopyAllBufferData();
 	getPS(PS_WIREFRAME)->SetShader();
-	context->RSSetState(wireFrameState);
+	mContext->RSSetState(wireFrameState);
 	//DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1);
 	//renderer->getWireframeShader()->SetData("Color", &color, sizeof(DirectX::XMFLOAT4));
-	context->DrawIndexed(
+	mContext->DrawIndexed(
 		mesh->getIndexCount(),     // The number of indices to use (we could draw a subset if we wanted)
 		0,     // Offset to the first index we want to use
 		0);    // Offset to add to each index when looking up vertices
@@ -233,20 +238,19 @@ SpriteFont * Renderer::getSpriteFont()
 	return spriteFont.get();
 }
 
-void Renderer::resetPostProcess(ID3D11DepthStencilView* depthStencilView)
+void Renderer::resetPostProcess()
 {
 	const float color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 	// Clear the render target and depth buffer (erases what's on the screen)
-	context->ClearRenderTargetView(postProcessRTV, color);
-	//context->OMSetRenderTargets(1, &postProcessRTV, depthStencilView);
+	mContext->ClearRenderTargetView(postProcessRTV, color);
 }
 
 void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTargetMS)
 {
 	unsigned int sub = D3D11CalcSubresource(0, 0, 1);
 
-	context->ResolveSubresource(
+	mContext->ResolveSubresource(
 		ppTexture,
 		sub,
 		renderTargetMS,
@@ -255,8 +259,8 @@ void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTarg
 	);
 
 	// Reset the states!
-	context->RSSetState(0);
-	context->OMSetDepthStencilState(0, 0);
+	mContext->RSSetState(0);
+	mContext->OMSetDepthStencilState(0, 0);
 
 	getVS(VS_POST_PROCESS)->SetShader();
 
@@ -268,10 +272,10 @@ void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTarg
 	getPS(PS_POST_PROCESS)->CopyAllBufferData();
 
 	ID3D11Buffer* nothing = 0;
-	context->IASetVertexBuffers(0, 1, &nothing, &stride, &offset);
-	context->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
+	mContext->IASetVertexBuffers(0, 1, &nothing, &stride, &offset);
+	mContext->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
 
-	context->Draw(3, 0);
+	mContext->Draw(3, 0);
 
 	getPS(PS_POST_PROCESS)->SetShaderResourceView("Pixels", 0);
 }

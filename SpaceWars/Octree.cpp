@@ -10,6 +10,8 @@ Octree::Octree(Vector3 min, Vector3 max, int maxObjects)
 
 void deleteHelper(OctNode* tempHead)
 {
+	if (tempHead == nullptr) return;
+
 	if (tempHead->isLeaf())
 	{
 		delete tempHead;
@@ -24,12 +26,15 @@ void deleteHelper(OctNode* tempHead)
 		deleteHelper(tempHead->getLeaf(5));
 		deleteHelper(tempHead->getLeaf(6));
 		deleteHelper(tempHead->getLeaf(7));
+
+		delete tempHead;
 	}
 }
 
 Octree::~Octree()
 {
 	deleteHelper(head);
+	head = nullptr;
 }
 
 int Octree::getMaxObjects()

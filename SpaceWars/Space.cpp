@@ -9,6 +9,7 @@ Space::Space() : Scene("space")
 
 Space::~Space()
 {
+	
 }
 
 void Space::init()

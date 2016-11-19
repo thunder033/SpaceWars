@@ -15,7 +15,7 @@ class Scene
 protected:
 	std::string name; //Name of the scene
 	std::vector<GameObject*> entities; //The collection of entities associated with this scene
-	Octree* octree;
+	std::unique_ptr<Octree> octree;
 
 public:
 	Scene(std::string name);

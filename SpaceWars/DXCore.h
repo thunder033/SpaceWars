@@ -34,7 +34,10 @@ public:
 
 	// Initialization and game-loop related methods
 	HRESULT InitWindow();
+	HRESULT CreateDevice();
+	HRESULT CheckMultiSampleSupport();
 	HRESULT InitDirectX();
+	HRESULT CreateRenderViews();
 	HRESULT Run();				
 	void Quit();
 	virtual void OnResize();
@@ -70,20 +73,24 @@ protected:
 	unsigned int height;
 	
 	// DirectX related objects and variables
-	D3D_FEATURE_LEVEL		dxFeatureLevel;
-	IDXGISwapChain*			swapChain;
-	ID3D11Device*			device;
-	ID3D11DeviceContext*	context;
-
+	ID3D11Device*			mDevice;
+	ID3D11DeviceContext*	mContext;
+	D3D_FEATURE_LEVEL		mDXFeatureLevel;
+	IDXGISwapChain*			mSwapChain;
+	
+	//Render Targets
 	ID3D11Texture2D* mOffScreenRT;
-	ID3D11Texture2D* mBackBufferTexture;
+	ID3D11Texture2D* mBackBufferRT;
 
-	ID3D11RenderTargetView* backBufferRTV;
+	//Render Target Views
+	ID3D11RenderTargetView* mBackBufferRTV;
 	ID3D11RenderTargetView* mOffScreenRTV;
-	ID3D11DepthStencilView* depthStencilView;
+	ID3D11DepthStencilView* mDepthStencilView;
 
-	UINT mSampleSize = 4;
+	//MSAA properties
+	UINT mSampleSize = 1;
 	UINT mQualityFlags = 0;
+	DXGI_FORMAT mFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 	// Helper function for allocating a console window
 	void CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns);

@@ -118,7 +118,7 @@ protected:
 	
 	bool shaderValid;
 	ID3DBlob* shaderBlob;
-	ID3D11Device* device;
+	ID3D11Device* mDevice;
 	ID3D11DeviceContext* deviceContext;
 
 	// Resource counts

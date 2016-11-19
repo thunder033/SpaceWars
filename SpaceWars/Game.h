@@ -39,16 +39,14 @@ private:
 	// Initialization helper methods - feel free to customize, combine, etc.
 	void CreateLights();
 
-	Renderer* renderer;
+	std::unique_ptr<Renderer> renderer;
 
 	//Textures
 	ID3D11ShaderResourceView* crateSrv;
 
 	//Rendering Data
-	Camera* camera;
+	std::unique_ptr<Camera> camera;
 	DirectionalLight* lights;
-
-	//Game
 
 
 	// Keeps track of the old mouse position.  Useful for 

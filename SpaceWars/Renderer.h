@@ -23,8 +23,8 @@ using namespace DirectX;
 
 class Renderer
 {
-	ID3D11Device*			device;
-	ID3D11DeviceContext*	context;
+	ID3D11Device*			mDevice;
+	ID3D11DeviceContext*	mContext;
 	DXCore*					dxcore;
 
 	static std::map<std::string, SimpleVertexShader*> vertexShaders;
@@ -65,7 +65,7 @@ public:
 	SpriteFont* getSpriteFont();
 
 	//Rendering Functions
-	void resetPostProcess(ID3D11DepthStencilView* depthStencilView);
+	void resetPostProcess();
 	void postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTargetMS);
 
 	ID3D11RasterizerState* getWireFrameState() const {

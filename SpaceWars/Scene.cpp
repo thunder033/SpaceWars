@@ -7,16 +7,18 @@ Scene::Scene(std::string name)
 {
 	this->name = name;
 	Scene::scenes[name] = this;
+	octree = nullptr;
 }
 
 
 Scene::~Scene()
 {
+	releaseEntities();
 }
 
 void Scene::init()
 {
-	octree = new Octree(Vector3(-10.0f, -10.0f, -10.0f), Vector3(10.0f, 10.0f, 10.0), 1);
+	octree = std::unique_ptr<Octree>(new Octree(Vector3(-10.0f, -10.0f, -10.0f), Vector3(10.0f, 10.0f, 10.0), 1));
 	octree->generateTree(entities);
 
 }
@@ -41,17 +43,21 @@ std::vector<GameObject*> Scene::getEntities()
 
 void Scene::releaseEntities()
 {
-	std::vector<GameObject*>::iterator it;
-	for (it = entities.begin(); it < entities.end(); it++) {
-		delete *it;
-	}
 
-	entities.clear();
+	if (entities.size() > 0) {
+
+		std::vector<GameObject*>::iterator it;
+		for (it = entities.begin(); it < entities.end(); it++) {
+			delete *it;
+		}
+
+		entities.clear();
+	}
 }
 
 Octree* Scene::getEntityTree()
 {
-	return octree;
+	return octree.get();
 }
 
 //Static Methods
@@ -73,12 +79,13 @@ Scene* Scene::getActive()
 
 void Scene::release()
 {
-	if (activeScene != nullptr) {
-		activeScene->releaseEntities();
-	}
-	
 	//Clean up scenes
 	for (auto kv : Scene::scenes) {
-		delete kv.second;
+		if (kv.second != nullptr) {
+			delete kv.second;
+		}
 	}
+
+	Scene::scenes.clear();
+	activeScene = nullptr;
 }

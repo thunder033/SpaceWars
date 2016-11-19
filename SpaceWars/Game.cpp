@@ -24,7 +24,7 @@ Game::Game(HINSTANCE hInstance)
 {
 	// Initialize fields
 	mouseDragging = false;
-	camera = new Camera((float)width / height);
+	camera = std::unique_ptr<Camera>(new Camera((float)width / height));
 
 #if defined(DEBUG) || defined(_DEBUG)
 	// Do we want a console window?  Probably only in debug mode
@@ -40,18 +40,22 @@ Game::Game(HINSTANCE hInstance)
 // --------------------------------------------------------
 Game::~Game()
 {
+
+#if defined(DEBUG) || defined(_DEBUG)
+	//Dump out detailed info of all of the currently existing DX resources
+	ID3D11Debug* debug;
+	mDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug));
+	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
+	debug->Release();
+#endif
+
 	Scene::release();
 	Mesh::release();
 	Material::release();
 
-	// Delete our simple shader objects, which
-	// will clean up their own internal DirectX stuff
-	delete lights;
-	delete camera;
-
 	crateSrv->Release();
 
-	delete renderer;
+	delete lights;
 }
 
 // --------------------------------------------------------
@@ -62,18 +66,18 @@ void Game::Init()
 {
 
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
-	renderer = new Renderer(device, context, this);
+	renderer = std::unique_ptr<Renderer>(new Renderer(mDevice, mContext, this));
 
 	//setup the camera
 	camera->setAspectRatio((float)width / height);
 
 	//Load meshes
-	Mesh::loadMeshes(device);
+	Mesh::loadMeshes(mDevice);
 
 	//Wood Texture
 	CreateWICTextureFromFile(
-		device, 
-		context, //Providing the context will auto-generate mipmaps
+		mDevice, 
+		mContext, //Providing the context will auto-generate mipmaps
 		L"Debug/Assets/Textures/crate.png", 
 		0, //we don't actually need the texture reference
 		&crateSrv);
@@ -95,7 +99,7 @@ void Game::Init()
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 // --------------------------------------------------------
@@ -158,15 +162,15 @@ void Game::Draw(float deltaTime, float totalTime)
 	// Clear the render target and depth buffer (erases what's on the screen)
 	//  - Do this ONCE PER FRAME
 	//  - At the beginning of Draw (before drawing *anything*)
-	context->ClearRenderTargetView(mOffScreenRTV, color);
-	context->ClearDepthStencilView(
-		depthStencilView, 
+	mContext->ClearRenderTargetView(mOffScreenRTV, color);
+	mContext->ClearDepthStencilView(
+		mDepthStencilView, 
 		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
 		1.0f,
 		0);
 
-	renderer->resetPostProcess(depthStencilView);
-	context->OMSetRenderTargets(1, &mOffScreenRTV, depthStencilView);
+	renderer->resetPostProcess();
+	mContext->OMSetRenderTargets(1, &mOffScreenRTV, mDepthStencilView);
 
 	//Update the light data
 	renderer->setLightData(lights);
@@ -174,22 +178,22 @@ void Game::Draw(float deltaTime, float totalTime)
 	std::vector<GameObject*> entities = Scene::getActive()->getEntities();
 	std::vector<GameObject*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
-		renderer->render(*it, camera);
+		renderer->render(*it, camera.get());
 	}
 
-	Scene::getActive()->draw(deltaTime, totalTime, renderer);
+	Scene::getActive()->draw(deltaTime, totalTime, renderer.get());
 
 	//Reset Render states
-	context->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
-	context->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
+	mContext->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
+	mContext->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
 
-	context->OMSetRenderTargets(1, &backBufferRTV, 0);
+	mContext->OMSetRenderTargets(1, &mBackBufferRTV, 0);
 	renderer->postProcess(sizeof(Vertex), 0, mOffScreenRT);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
-	swapChain->Present(1, 0);
+	mSwapChain->Present(1, 0);
 }
 
 
