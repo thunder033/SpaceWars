@@ -194,7 +194,7 @@ HRESULT DXResourceContext::createRenderTargets()
 		&primaryRTVDesc,
 		&mPrimaryRTV);
 
-	// 2. -----POST PROCESS RENDER TARGET--------
+	// 2. -----POST PROCESS RENDER TARGETS--------
 	// Next create a single-sample render target for post process render passes
 	D3D11_TEXTURE2D_DESC textureDesc = {};
 	ZeroMemory(&textureDesc, sizeof(D3D11_TEXTURE2D_DESC));
@@ -211,8 +211,10 @@ HRESULT DXResourceContext::createRenderTargets()
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 
 	DX::ThrowIfFailed(mDevice->CreateTexture2D(&textureDesc, 0, &mPostProcessRT));
+	DX::ThrowIfFailed(mDevice->CreateTexture2D(&textureDesc, 0, &mBloomMapRT));
+	DX::ThrowIfFailed(mDevice->CreateTexture2D(&textureDesc, 0, &mTemporaryRT));
 
-	//Create Post Process Render Target View
+	//Create Post Process Render Target Views
 	D3D11_RENDER_TARGET_VIEW_DESC postProcessRTVDesc = {};
 	ZeroMemory(&postProcessRTVDesc, sizeof(D3D11_RENDER_TARGET_VIEW_DESC));
 	postProcessRTVDesc.Format = textureDesc.Format;
@@ -220,6 +222,20 @@ HRESULT DXResourceContext::createRenderTargets()
 	postProcessRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
 	DX::ThrowIfFailed(mDevice->CreateRenderTargetView(mPostProcessRT, &postProcessRTVDesc, &mPostProcessRTV));
+	DX::ThrowIfFailed(mDevice->CreateRenderTargetView(mBloomMapRT, &postProcessRTVDesc, &mBloomMapRTV));
+	DX::ThrowIfFailed(mDevice->CreateRenderTargetView(mTemporaryRT, &postProcessRTVDesc, &mTemporaryRTV));
+
+	//Create Shader Resource Views
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	ZeroMemory(&srvDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
+	srvDesc.Format = support.format;
+	srvDesc.Texture2D.MipLevels = 1;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+	DX::ThrowIfFailed(mDevice->CreateShaderResourceView(mPostProcessRT, &srvDesc, &mPostProcessSRV));
+	DX::ThrowIfFailed(mDevice->CreateShaderResourceView(mBloomMapRT, &srvDesc, &mBloomMapSRV));
+	DX::ThrowIfFailed(mDevice->CreateShaderResourceView(mTemporaryRT, &srvDesc, &mTemporarySRV));
 
 	// 3. -----BACK BUFFER RENDER TARGET--------
 	// Finally create the render target to the back buffer 
@@ -273,11 +289,19 @@ void DXResourceContext::releaseSizeDependentResources()
 {
 	if (mDepthStencilView) { mDepthStencilView->Release(); }
 
+	if (mPostProcessSRV) { mPostProcessSRV->Release(); }
+	if (mBloomMapSRV) { mBloomMapSRV->Release(); }
+	if (mTemporarySRV) { mTemporarySRV->Release(); }
+
 	if (mPrimaryRTV) { mPrimaryRTV->Release(); }
+	if (mTemporaryRTV) { mTemporaryRTV->Release(); }
+	if (mBloomMapRTV) { mBloomMapRTV->Release(); }
 	if (mPostProcessRTV) { mPostProcessRTV->Release(); }
 	if (mBackBufferRTV) { mBackBufferRTV->Release(); }
 
 	if (mPrimaryRT) { mPrimaryRT->Release(); }
+	if (mTemporaryRT) { mTemporaryRT->Release(); }
+	if (mBloomMapRT) { mBloomMapRT->Release(); }
 	if (mPostProcessRT) { mPostProcessRT->Release(); }
 	if (mBackBufferRT) { mBackBufferRT->Release(); }
 }
@@ -287,11 +311,19 @@ void DXResourceContext::release()
 	// Release all DirectX resources
 	if (mDepthStencilView) { mDepthStencilView->Release(); }
 
+	if (mPostProcessSRV) { mPostProcessSRV->Release(); }
+	if (mBloomMapSRV) { mBloomMapSRV->Release(); }
+	if (mTemporarySRV) { mTemporarySRV->Release(); }
+
 	if (mPrimaryRTV) { mPrimaryRTV->Release(); }
+	if (mTemporaryRTV) { mTemporaryRTV->Release(); }
+	if (mBloomMapRTV) { mBloomMapRTV->Release(); }
 	if (mPostProcessRTV) { mPostProcessRTV->Release(); }
 	if (mBackBufferRTV) { mBackBufferRTV->Release(); }
 
 	if (mPrimaryRT) { mPrimaryRT->Release(); }
+	if (mTemporaryRT) { mTemporaryRT->Release(); }
+	if (mBloomMapRT) { mBloomMapRT->Release(); }
 	if (mPostProcessRT) { mPostProcessRT->Release(); }
 	if (mBackBufferRT) { mBackBufferRT->Release(); }
 

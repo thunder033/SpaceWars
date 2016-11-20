@@ -23,7 +23,10 @@ using namespace DirectX;
 
 #define PS_MAIN "mainPS"
 #define PS_WIREFRAME "wireframePS"
-#define PS_POST_PROCESS "postProcessPS"
+#define PS_FIELD_BLUR "fieldBlurPS"
+#define PS_BLOOM_EXTRACT "bloomExtractPS"
+#define PS_BLOOM_COMPOSITE "bloomCompositePS"
+#define PS_GAUSSION_BLUR "gaussionBlurPS"
 
 class Renderer
 {
@@ -36,9 +39,7 @@ class Renderer
 	ID3D11ShaderResourceView* defaultSrv;
 	
 	//Post processing
-	ID3D11Texture2D* ppTexture;
-	ID3D11RenderTargetView* postProcessRTV;
-	ID3D11ShaderResourceView* postProcessSRV;
+
 
 	std::unique_ptr<DirectX::CommonStates> renderStates;
 	ID3D11RasterizerState* wireFrameState;

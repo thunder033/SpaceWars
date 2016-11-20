@@ -177,7 +177,6 @@ void Game::Draw(float deltaTime, float totalTime)
 	mRC->mContext->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
 	mRC->mContext->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
 
-	mRC->mContext->OMSetRenderTargets(1, &mRC->mBackBufferRTV, 0);
 	renderer->postProcess(sizeof(Vertex), 0, mRC->mPrimaryRT);
 
 	// Present the back buffer to the user

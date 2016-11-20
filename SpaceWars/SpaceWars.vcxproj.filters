@@ -175,7 +175,16 @@
     <FxCompile Include="PostProcessVS.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="PostProcessPS.hlsl">
+    <FxCompile Include="BloomExtract.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="BloomComposite.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="FieldBlur.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="GaussionBlur.hlsl">
       <Filter>Shaders</Filter>
     </FxCompile>
   </ItemGroup>

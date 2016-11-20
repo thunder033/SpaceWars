@@ -86,7 +86,9 @@ void Renderer::loadShaders()
 	//Load Pixel Shaders
 	loadShader(L"PixelShader.cso", &shaders[PS_MAIN], SS_PIXEL);
 	loadShader(L"WireframeShader.cso", &shaders[PS_WIREFRAME], SS_PIXEL);
-	loadShader(L"PostProcessPS.cso", &shaders[PS_POST_PROCESS], SS_PIXEL);
+	loadShader(L"FieldBlur.cso", &shaders[PS_FIELD_BLUR], SS_PIXEL);
+	loadShader(L"BloomExtract.cso", &shaders[PS_BLOOM_EXTRACT], SS_PIXEL);
+	loadShader(L"BloomComposite.cso", &shaders[PS_BLOOM_COMPOSITE], SS_PIXEL);
 }
 
 void Renderer::createSampler()
@@ -130,15 +132,6 @@ Renderer::Renderer(DXResourceContext* rc)
 	RSWireFrameDesc.AntialiasedLineEnable = true;
 
 	HRESULT created = mRC->mDevice->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
-	
-	//Create Shader Resource View
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-	srvDesc.Format = mRC->support.format;
-	srvDesc.Texture2D.MipLevels = 1;
-	srvDesc.Texture2D.MostDetailedMip = 0;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-
-	DX::ThrowIfFailed(mRC->mDevice->CreateShaderResourceView(mRC->mPostProcessRT, &srvDesc, &postProcessSRV));
 }
 
 
@@ -152,9 +145,6 @@ Renderer::~Renderer()
 
 	if (sampler) { sampler->Release(); }
 	if (defaultSrv) { defaultSrv->Release(); }
-
-
-	if (postProcessSRV) { postProcessSRV->Release(); }
 
 	if (wireFrameState) { wireFrameState->Release(); }
 
@@ -186,8 +176,8 @@ void Renderer::render(GameObject * gameObject, Camera * camera)
 		0,     // Offset to the first index we want to use
 		0);    // Offset to add to each index when looking up vertices
 
-	getPS(PS_WIREFRAME)->CopyAllBufferData();
 	getPS(PS_WIREFRAME)->SetShader();
+	getPS(PS_WIREFRAME)->CopyAllBufferData();
 	mRC->mContext->RSSetState(wireFrameState);
 	//DirectX::XMFLOAT4 color = DirectX::XMFLOAT4(1, 1, 1, 1);
 	//renderer->getWireframeShader()->SetData("Color", &color, sizeof(DirectX::XMFLOAT4));
@@ -247,20 +237,60 @@ void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTarg
 	mRC->mContext->RSSetState(0);
 	mRC->mContext->OMSetDepthStencilState(0, 0);
 
-	getVS(VS_POST_PROCESS)->SetShader();
-
-	getPS(PS_POST_PROCESS)->SetShader();
-	getPS(PS_POST_PROCESS)->SetShaderResourceView("Pixels", postProcessSRV);
-	getPS(PS_POST_PROCESS)->SetInt("blurAmount", 3);
-	getPS(PS_POST_PROCESS)->SetFloat("pixelWidth", 1.0f / mRC->dimensions.width);
-	getPS(PS_POST_PROCESS)->SetFloat("pixelHeight", 1.0f / mRC->dimensions.height);
-	getPS(PS_POST_PROCESS)->CopyAllBufferData();
-
+	//Setup context for post processing
 	ID3D11Buffer* nothing = 0;
 	mRC->mContext->IASetVertexBuffers(0, 1, &nothing, &stride, &offset);
 	mRC->mContext->IASetIndexBuffer(0, DXGI_FORMAT_R32_UINT, 0);
 
+	ID3D11ShaderResourceView* null[] = { nullptr, nullptr };
+
+	getVS(VS_POST_PROCESS)->SetShader();
+
+	//Extract a bloom map from the scene
+	mRC->mContext->PSSetShaderResources(0, 2, null);
+	mRC->mContext->OMSetRenderTargets(1, &mRC->mBloomMapRTV, 0);
+
+	getPS(PS_BLOOM_EXTRACT)->SetShader();
+	getPS(PS_BLOOM_EXTRACT)->SetShaderResourceView("ColorTexture", mRC->mPostProcessSRV);
+	getPS(PS_BLOOM_EXTRACT)->SetFloat("BloomThreshold", 0.3f);
+	getPS(PS_BLOOM_EXTRACT)->SetSamplerState("Sampler", sampler);
+	getPS(PS_BLOOM_EXTRACT)->CopyAllBufferData();
+
 	mRC->mContext->Draw(3, 0);
 
-	getPS(PS_POST_PROCESS)->SetShaderResourceView("Pixels", 0);
+	getPS(PS_BLOOM_EXTRACT)->SetShaderResourceView("ColorTexture", 0);
+
+	mRC->mContext->PSSetShaderResources(0, 2, null);
+	mRC->mContext->OMSetRenderTargets(1, &mRC->mTemporaryRTV, 0);
+
+	//Apply Blur to the bloom Map
+	getPS(PS_FIELD_BLUR)->SetShader();
+	getPS(PS_FIELD_BLUR)->SetShaderResourceView("Pixels", mRC->mBloomMapSRV);
+	getPS(PS_FIELD_BLUR)->SetInt("blurAmount", 3);
+	getPS(PS_FIELD_BLUR)->SetFloat("pixelWidth", 1.0f / mRC->dimensions.width);
+	getPS(PS_FIELD_BLUR)->SetFloat("pixelHeight", 1.0f / mRC->dimensions.height);
+	getPS(PS_FIELD_BLUR)->CopyAllBufferData();
+
+	mRC->mContext->Draw(3, 0);
+
+	getPS(PS_FIELD_BLUR)->SetShaderResourceView("Pixels", 0);
+
+	//Render the composite into the back buffer
+	mRC->mContext->OMSetRenderTargets(1, &mRC->mBackBufferRTV, 0);
+
+	getPS(PS_BLOOM_COMPOSITE)->SetShader();
+	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("ColorTexture", mRC->mPostProcessSRV);
+	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("BloomTexture", mRC->mTemporarySRV);
+	getPS(PS_BLOOM_COMPOSITE)->SetFloat("BloomIntensity", 2.0f);
+	getPS(PS_BLOOM_COMPOSITE)->SetFloat("BloomSaturation", 1.0f);
+	getPS(PS_BLOOM_COMPOSITE)->SetFloat("SceneIntensity", 1.0f);
+	getPS(PS_BLOOM_COMPOSITE)->SetFloat("SceneSaturation", 1.0f);
+	getPS(PS_BLOOM_COMPOSITE)->SetSamplerState("Sampler", sampler);
+	getPS(PS_BLOOM_COMPOSITE)->CopyAllBufferData();
+
+	mRC->mContext->Draw(3, 0);
+
+	//Reset resource views
+	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("ColorTexture", 0);
+	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("BloomTexture", 0);
 }

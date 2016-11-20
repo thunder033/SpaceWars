@@ -16,13 +16,6 @@ using namespace DirectX;
 // instead of in Visual Studio settings if we want
 #pragma comment(lib, "d3d11.lib")
 
-#define VS_MAIN "mainVS"
-#define VS_POST_PROCESS "postProcessVS"
-
-#define PS_MAIN "mainPS"
-#define PS_WIREFRAME "wireframePS"
-#define PS_POST_PROCESS "postProcessPS"
-
 struct DeviceSupport
 {
 	//MSAA properties
@@ -49,14 +42,25 @@ class DXResourceContext
 	IDXGISwapChain*			mSwapChain;
 
 	// Render Targets
-	ID3D11Texture2D* mPrimaryRT;
-	ID3D11Texture2D* mPostProcessRT;
-	ID3D11Texture2D* mBackBufferRT;
+	ID3D11Texture2D* mPrimaryRT; //Primay multi-sample output
+
+	ID3D11Texture2D* mPostProcessRT; //Holds the flattend primary output
+	ID3D11Texture2D* mBloomMapRT; //Holds the extract bloom map
+	ID3D11Texture2D* mTemporaryRT; //Holds intermedate results
+
+	ID3D11Texture2D* mBackBufferRT; //Reference to the swap-chain back buffer
 
 	// Render Target Views
 	ID3D11RenderTargetView* mPrimaryRTV;
 	ID3D11RenderTargetView* mPostProcessRTV;
+	ID3D11RenderTargetView* mBloomMapRTV;
+	ID3D11RenderTargetView* mTemporaryRTV;
 	ID3D11RenderTargetView* mBackBufferRTV;
+
+	// Shader Resource Views
+	ID3D11ShaderResourceView* mPostProcessSRV;
+	ID3D11ShaderResourceView* mBloomMapSRV;
+	ID3D11ShaderResourceView* mTemporarySRV;
 
 	ID3D11DepthStencilView* mDepthStencilView;
 
