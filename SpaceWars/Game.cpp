@@ -17,7 +17,7 @@ using namespace DirectX;
 Game::Game(HINSTANCE hInstance)
 	: DXCore( 
 		hInstance,		   // The application's handle
-		"DirectX Game",	   // Text for the window's title bar
+		"Space Wars",	   // Text for the window's title bar
 		1280,			   // Width of the window's client area
 		720,			   // Height of the window's client area
 		true)			   // Show extra stats (fps) in title bar?
@@ -44,7 +44,7 @@ Game::~Game()
 #if defined(DEBUG) || defined(_DEBUG)
 	//Dump out detailed info of all of the currently existing DX resources
 	ID3D11Debug* debug;
-	mDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug));
+	mRC->mDevice->QueryInterface(__uuidof(ID3D11Debug), reinterpret_cast<void**>(&debug));
 	debug->ReportLiveDeviceObjects(D3D11_RLDO_DETAIL);
 	debug->Release();
 #endif
@@ -66,18 +66,18 @@ void Game::Init()
 {
 
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
-	renderer = std::unique_ptr<Renderer>(new Renderer(mDevice, mContext, this));
+	renderer = std::unique_ptr<Renderer>(new Renderer(mRC.get()));
 
 	//setup the camera
 	camera->setAspectRatio((float)width / height);
 
 	//Load meshes
-	Mesh::loadMeshes(mDevice);
+	Mesh::loadMeshes(mRC->mDevice);
 
 	//Wood Texture
 	CreateWICTextureFromFile(
-		mDevice, 
-		mContext, //Providing the context will auto-generate mipmaps
+		mRC->mDevice,
+		mRC->mContext, //Providing the context will auto-generate mipmaps
 		L"Debug/Assets/Textures/crate.png", 
 		0, //we don't actually need the texture reference
 		&crateSrv);
@@ -99,7 +99,7 @@ void Game::Init()
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
-	mContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mRC->mContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 // --------------------------------------------------------
@@ -156,21 +156,11 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	// Background color (Black) for clearing
-	const float color[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 
-	// Clear the render target and depth buffer (erases what's on the screen)
-	//  - Do this ONCE PER FRAME
-	//  - At the beginning of Draw (before drawing *anything*)
-	mContext->ClearRenderTargetView(mOffScreenRTV, color);
-	mContext->ClearDepthStencilView(
-		mDepthStencilView, 
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f,
-		0);
+	renderer->clearRenderTargets();
 
-	renderer->resetPostProcess();
-	mContext->OMSetRenderTargets(1, &mOffScreenRTV, mDepthStencilView);
+	//Switch to the primary RTV
+	mRC->mContext->OMSetRenderTargets(1, &mRC->mPrimaryRTV, mRC->mDepthStencilView);
 
 	//Update the light data
 	renderer->setLightData(lights);
@@ -184,16 +174,16 @@ void Game::Draw(float deltaTime, float totalTime)
 	Scene::getActive()->draw(deltaTime, totalTime, renderer.get());
 
 	//Reset Render states
-	mContext->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
-	mContext->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
+	mRC->mContext->OMSetBlendState(renderer->getCommonStates()->Opaque(), nullptr, 0xFFFFFFFF);
+	mRC->mContext->OMSetDepthStencilState(renderer->getCommonStates()->DepthDefault(), 0);
 
-	mContext->OMSetRenderTargets(1, &mBackBufferRTV, 0);
-	renderer->postProcess(sizeof(Vertex), 0, mOffScreenRT);
+	mRC->mContext->OMSetRenderTargets(1, &mRC->mBackBufferRTV, 0);
+	renderer->postProcess(sizeof(Vertex), 0, mRC->mPrimaryRT);
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
 	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
-	mSwapChain->Present(1, 0);
+	mRC->mSwapChain->Present(1, 0);
 }
 
 

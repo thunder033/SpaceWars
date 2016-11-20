@@ -4,6 +4,7 @@
 #include <d3d11.h>
 #include <string>
 #include "DirectXHelper.h"
+#include "DXResourceContext.h"
 
 // We can include the correct library files here
 // instead of in Visual Studio settings if we want
@@ -34,10 +35,7 @@ public:
 
 	// Initialization and game-loop related methods
 	HRESULT InitWindow();
-	HRESULT CreateDevice();
-	HRESULT CheckMultiSampleSupport();
 	HRESULT InitDirectX();
-	HRESULT CreateRenderViews();
 	HRESULT Run();				
 	void Quit();
 	virtual void OnResize();
@@ -72,25 +70,7 @@ protected:
 	unsigned int width;
 	unsigned int height;
 	
-	// DirectX related objects and variables
-	ID3D11Device*			mDevice;
-	ID3D11DeviceContext*	mContext;
-	D3D_FEATURE_LEVEL		mDXFeatureLevel;
-	IDXGISwapChain*			mSwapChain;
-	
-	//Render Targets
-	ID3D11Texture2D* mOffScreenRT;
-	ID3D11Texture2D* mBackBufferRT;
-
-	//Render Target Views
-	ID3D11RenderTargetView* mBackBufferRTV;
-	ID3D11RenderTargetView* mOffScreenRTV;
-	ID3D11DepthStencilView* mDepthStencilView;
-
-	//MSAA properties
-	UINT mSampleSize = 1;
-	UINT mQualityFlags = 0;
-	DXGI_FORMAT mFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+	std::unique_ptr<DXResourceContext> mRC;
 
 	// Helper function for allocating a console window
 	void CreateConsoleWindow(int bufferLines, int bufferColumns, int windowLines, int windowColumns);

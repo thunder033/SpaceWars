@@ -1,6 +1,5 @@
 #pragma once
 
-#include "GameObject.h"
 #include "Mesh.h"
 #include "Material.h"
 #include "Transform.h"

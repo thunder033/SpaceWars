@@ -123,6 +123,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collider.cpp" />
     <ClCompile Include="DXCore.cpp" />
+    <ClCompile Include="DXResourceContext.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="Collision.hpp" />
     <ClInclude Include="DirectXHelper.h" />
     <ClInclude Include="DXCore.h" />
+    <ClInclude Include="DXResourceContext.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Entity.h" />

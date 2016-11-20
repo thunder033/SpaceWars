@@ -11,8 +11,12 @@
 #include <SpriteBatch.h>
 #include <CommonStates.h>
 #include <map>
+#include "DXResource.h"
 
 using namespace DirectX;
+
+#define SS_VERTEX 0
+#define SS_PIXEL 1
 
 #define VS_MAIN "mainVS"
 #define VS_POST_PROCESS "postProcessVS"
@@ -23,16 +27,12 @@ using namespace DirectX;
 
 class Renderer
 {
-	ID3D11Device*			mDevice;
-	ID3D11DeviceContext*	mContext;
-	DXCore*					dxcore;
+	DXResourceContext* mRC;
 
-	static std::map<std::string, SimpleVertexShader*> vertexShaders;
-	static std::map<std::string, SimplePixelShader*> pixelShaders;
+	static std::map<std::string, ISimpleShader*> shaders;
 
 	ID3D11SamplerState* sampler;
 
-	ID3D11Texture2D* defaultTexture;
 	ID3D11ShaderResourceView* defaultSrv;
 	
 	//Post processing
@@ -47,11 +47,13 @@ class Renderer
 	std::unique_ptr<SpriteFont> spriteFont;
 
 	void loadShaders();
+	void loadShader(std::wstring shaderFile, ISimpleShader** shader, const int &shaderType);
+
 	void createSampler();
 	void createDefaultMaterial();
 	
 public:
-	Renderer(ID3D11Device* device, ID3D11DeviceContext* context, DXCore* dxcore);
+	Renderer(DXResourceContext* rc);
 	~Renderer();
 
 	//TODO: implement this
@@ -65,7 +67,7 @@ public:
 	SpriteFont* getSpriteFont();
 
 	//Rendering Functions
-	void resetPostProcess();
+	void clearRenderTargets();
 	void postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTargetMS);
 
 	ID3D11RasterizerState* getWireFrameState() const {
@@ -77,23 +79,23 @@ public:
 	}
 
 	SimpleVertexShader* getVertexShader() {
-		return vertexShaders[VS_MAIN];
+		return  static_cast<SimpleVertexShader*>(shaders[VS_MAIN]);
 	}
 
 	SimplePixelShader* getPixelShader() {
-		return pixelShaders[PS_MAIN];
+		return static_cast<SimplePixelShader*>(shaders[PS_MAIN]);
 	}
 
 	SimplePixelShader* getWireframeShader() {
-		return pixelShaders[PS_WIREFRAME];
+		return static_cast<SimplePixelShader*>(shaders[PS_WIREFRAME]);
 	}
 
 	static SimpleVertexShader* getVS(std::string name) {
-		return vertexShaders[name];
+		return static_cast<SimpleVertexShader*>(shaders[name]);
 	}
 
 	static SimplePixelShader* getPS(std::string name) {
-		return pixelShaders[name];
+		return static_cast<SimplePixelShader*>(shaders[name]);
 	}
 
 	ID3D11ShaderResourceView* getDefaultTexture() {

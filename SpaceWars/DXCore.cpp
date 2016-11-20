@@ -50,12 +50,9 @@ DXCore::DXCore(
 	// Initialize fields
 	fpsFrameCount = 0;
 	fpsTimeElapsed = 0.0f;
-	
-	mDevice = 0;
-	mContext = 0;
-	mSwapChain = 0;
-	mOffScreenRTV = 0;
-	mDepthStencilView = 0;
+
+	// Create the resource context that will maintain resources
+	mRC = std::unique_ptr<DXResourceContext>(new DXResourceContext());
 
 	// Query performance counter for accurate timing information
 	__int64 perfFreq;
@@ -68,18 +65,7 @@ DXCore::DXCore(
 // --------------------------------------------------------
 DXCore::~DXCore()
 {
-	// Release all DirectX resources
-	if (mDepthStencilView) { mDepthStencilView->Release(); }
-	if (mOffScreenRTV) { mOffScreenRTV->Release(); }
-	if (mBackBufferRTV) { mBackBufferRTV->Release(); }
 	
-	if (mOffScreenRT) { mOffScreenRT->Release(); }
-	if (mBackBufferRT) { mBackBufferRT->Release(); }
-
-	if (mSwapChain) { mSwapChain->Release();}
-	if (mContext) { mContext->Release();}
-
-	if (mDevice) { mDevice->Release();}
 }
 
 // --------------------------------------------------------
@@ -159,156 +145,6 @@ HRESULT DXCore::InitWindow()
 	return S_OK;
 }
 
-HRESULT DXCore::CreateDevice()
-{
-
-	// This will hold options for DirectX initialization
-	unsigned int deviceFlags = 0;
-
-#if defined(DEBUG) || defined(_DEBUG)
-	// If we're in debug mode in visual studio, we also
-	// want to make a "Debug DirectX Device" to see some
-	// errors and warnings in Visual Studio's output window
-	// when things go wrong!
-	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
-
-	 HRESULT hr = D3D11CreateDevice(
-		0,							// Video adapter (physical GPU) to use, or null for default
-		D3D_DRIVER_TYPE_HARDWARE,	// We want to use the hardware (GPU)
-		0,							// Used when doing software rendering
-		deviceFlags,				// Any special options
-		0,							// Optional array of possible verisons we want as fallbacks
-		0,							// The number of fallbacks in the above param
-		D3D11_SDK_VERSION,			// Current version of the SDK
-		&mDevice,
-		&mDXFeatureLevel,
-		&mContext);
-
-	return hr;
-}
-
-HRESULT DXCore::CheckMultiSampleSupport()
-{
-	const UINT DXGI_FORMAT_MAX = 116;
-	const UINT MAX_SAMPLES_CHECK = 128;
-
-	//https://msdn.microsoft.com/en-us/library/windows/desktop/dn458384.aspx
-	for (UINT i = 1; i < DXGI_FORMAT_MAX; i++) {
-		//MS says this is supposed to be safe_cast, but couldn't find how to make it work
-		DXGI_FORMAT inFormat = static_cast<DXGI_FORMAT>(i);
-		UINT formatSupport = 0;
-		HRESULT hr = mDevice->CheckFormatSupport(inFormat, &formatSupport);
-
-		if ((formatSupport & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RESOLVE) &&
-			(formatSupport & D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET))
-		{
-			//NOT IMPLEMENTED YET
-		}
-	}
-
-	for (UINT sampleCount = 1; sampleCount <= D3D11_MAX_MULTISAMPLE_SAMPLE_COUNT; sampleCount++)
-	{
-		UINT numQualityFlags = 0;
-		HRESULT hr = mDevice->CheckMultisampleQualityLevels(mFormat, sampleCount, &numQualityFlags);
-
-		if (SUCCEEDED(hr) && numQualityFlags > 0)
-		{
-			mSampleSize = sampleCount;
-			//mQualityFlags = numQualityFlags;
-		}
-	}
-
-	return S_OK;
-}
-
-HRESULT DXCore::CreateRenderViews()
-{
-	// The above function created the back buffer render target
-	// for us, but we need a reference to it
-
-	//Get a reference to the currrent back buffer render target
-	mSwapChain->GetBuffer(
-		0,
-		__uuidof(ID3D11Texture2D),
-		(void**)&mBackBufferRT);
-
-	DX::ThrowIfFailed(mDevice->CreateRenderTargetView(mBackBufferRT, 0, &mBackBufferRTV));
-
-	D3D11_TEXTURE2D_DESC offScreenBufferDesc = {};
-	ZeroMemory(&offScreenBufferDesc, sizeof(D3D11_TEXTURE2D_DESC));
-	offScreenBufferDesc.Width = width;
-	offScreenBufferDesc.Height = height;
-	offScreenBufferDesc.MipLevels = 1;
-	offScreenBufferDesc.ArraySize = 1;
-	offScreenBufferDesc.Format = mFormat;
-	offScreenBufferDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
-	offScreenBufferDesc.SampleDesc.Count = mSampleSize;
-	offScreenBufferDesc.SampleDesc.Quality = mQualityFlags;
-
-	DX::ThrowIfFailed(
-		mDevice->CreateTexture2D(
-			&offScreenBufferDesc,
-			nullptr,
-			&mOffScreenRT)
-		);
-
-	//Describe a multi-sample render target view
-	CD3D11_RENDER_TARGET_VIEW_DESC rtvDesc(D3D11_RTV_DIMENSION_TEXTURE2DMS);
-
-	// Now that we have the texture, create a render target view
-	// for the back buffer so we can render into it.  Then release
-	// our local reference to the texture, since we have the view.
-	mDevice->CreateRenderTargetView(
-		mOffScreenRT,
-		&rtvDesc,
-		&mOffScreenRTV);
-
-	// Set up the description of the texture to use for the depth buffer
-	D3D11_TEXTURE2D_DESC depthStencilDesc;
-	depthStencilDesc.Width = width;
-	depthStencilDesc.Height = height;
-	depthStencilDesc.MipLevels = 1;
-	depthStencilDesc.ArraySize = 1;
-	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
-	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depthStencilDesc.CPUAccessFlags = 0;
-	depthStencilDesc.MiscFlags = 0;
-	depthStencilDesc.SampleDesc.Count = mSampleSize;
-	depthStencilDesc.SampleDesc.Quality = mQualityFlags;
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
-	ZeroMemory(&depthStencilViewDesc, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
-	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2DMS;
-	depthStencilViewDesc.Texture2D.MipSlice = 0;
-
-	// Create the depth buffer and its view, then 
-	// release our reference to the texture
-	ID3D11Texture2D* depthBufferTexture;
-	mDevice->CreateTexture2D(&depthStencilDesc, 0, &depthBufferTexture);
-	mDevice->CreateDepthStencilView(depthBufferTexture, 0, &mDepthStencilView);
-	depthBufferTexture->Release();
-
-	// Bind the views to the pipeline, so rendering properly 
-	// uses their underlying textures
-	mContext->OMSetRenderTargets(1, &mOffScreenRTV, mDepthStencilView);
-
-	// Lastly, set up a viewport so we render into
-	// to correct portion of the window
-	D3D11_VIEWPORT viewport = {};
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = (float)width;
-	viewport.Height = (float)height;
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	mContext->RSSetViewports(1, &viewport);
-
-	return S_OK;
-}
-
 // --------------------------------------------------------
 // Initializes DirectX, which requires a window.  This method
 // also creates several DirectX objects we'll need to start
@@ -318,67 +154,22 @@ HRESULT DXCore::InitDirectX()
 {
 
 	// Create the DX Device handle and rendering context
-	DX::ThrowIfFailed(CreateDevice());
+	DX::ThrowIfFailed(mRC->createDevice());
 	
 	// Check what level of multi-sampling the graphics device supports
-	CheckMultiSampleSupport();
+	DX::ThrowIfFailed(mRC->checkDeviceSupport());
 
-	// Until DXGI Factory is implement to separately create swap chain
-	// Release the original device/context
-	mContext->Release();
-	mDevice->Release();
+	//Create the swap chain now that we have info about MSAA
+	DX::ThrowIfFailed(mRC->createSwapChain(hWnd));
 
-	// This will hold options for DirectX initialization
-	unsigned int deviceFlags = 0;
+	//Set the viewport diemensions
+	mRC->setViewport(width, height);
 
-#if defined(DEBUG) || defined(_DEBUG)
-	// If we're in debug mode in visual studio, we also
-	// want to make a "Debug DirectX Device" to see some
-	// errors and warnings in Visual Studio's output window
-	// when things go wrong!
-	deviceFlags |= D3D11_CREATE_DEVICE_DEBUG;
-#endif
+	//Create render targets for the various passes
+	DX::ThrowIfFailed(mRC->createRenderTargets());
 
-	// Result variable for below function calls
-	HRESULT hr = S_OK;
-
-	// Create a description of how our swap
-	// chain should work
-	DXGI_SWAP_CHAIN_DESC swapDesc = {};
-	swapDesc.BufferCount = 1;
-	swapDesc.BufferDesc.Width = width;
-	swapDesc.BufferDesc.Height = height;
-	swapDesc.BufferDesc.RefreshRate.Numerator = 60;
-	swapDesc.BufferDesc.RefreshRate.Denominator = 1;
-	swapDesc.BufferDesc.Format = mFormat;
-	swapDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapDesc.Flags = 0;
-	swapDesc.OutputWindow = hWnd;
-	swapDesc.SampleDesc.Count = 1;
-	swapDesc.SampleDesc.Quality = 0;
-	swapDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	swapDesc.Windowed = true;
-
-	// Attempt to initialize DirectX
-	hr = D3D11CreateDeviceAndSwapChain(
-		0,							
-		D3D_DRIVER_TYPE_HARDWARE,	
-		0,							
-		deviceFlags,				
-		0,							
-		0,							
-		D3D11_SDK_VERSION,			
-		&swapDesc,					// Address of swap chain options
-		&mSwapChain,					// Pointer to our Swap Chain pointer
-		&mDevice,					// Pointer to our Device pointer
-		&mDXFeatureLevel,			// This will hold the actual feature level the app will use
-		&mContext);					// Pointer to our Device Context pointer
-	if (FAILED(hr)) return hr;
-
-	//Setup rendering resources (RT, RTV, DSV, etc)
-	DX::ThrowIfFailed(CreateRenderViews());
+	//Create the primary depth buffer
+	DX::ThrowIfFailed(mRC->createDepthBuffer());
 
 	// Return the "everything is ok" HRESULT value
 	return S_OK;
@@ -395,23 +186,14 @@ HRESULT DXCore::InitDirectX()
 void DXCore::OnResize()
 {
 	// Release existing DirectX views and buffers
-	if (mDepthStencilView) { mDepthStencilView->Release(); }
-	if (mOffScreenRTV) { mOffScreenRTV->Release(); }
-	if (mBackBufferRTV) { mBackBufferRTV->Release(); }
+	mRC->releaseSizeDependentResources();
 
-	if (mOffScreenRT) { mOffScreenRT->Release(); }
-	if (mBackBufferRT) { mBackBufferRT->Release(); }
-
-	// Resize the underlying swap chain buffers
-	mSwapChain->ResizeBuffers(
-		1,
-		width,
-		height,
-		mFormat,
-		0);
+	//Set the viewport dimensions
+	mRC->setViewport(width, height);
 
 	//Recreate rendering resources
-	DX::ThrowIfFailed(CreateRenderViews());
+	DX::ThrowIfFailed(mRC->createRenderTargets());
+	DX::ThrowIfFailed(mRC->createDepthBuffer());
 }
 
 
@@ -527,7 +309,7 @@ void DXCore::UpdateTitleBarStats()
 		"    Frame Time: "	<< mspf << "ms";
 
 	// Append the version of DirectX the app is using
-	switch (mDXFeatureLevel)
+	switch (mRC->support.dxFeatureLevel)
 	{
 	case D3D_FEATURE_LEVEL_11_1: output << "    DX 11.1"; break;
 	case D3D_FEATURE_LEVEL_11_0: output << "    DX 11.0"; break;
@@ -621,7 +403,7 @@ LRESULT DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 		// If DX is initialized, resize 
 		// our required buffers
-		if (mDevice) 
+		if (mRC->mDevice) 
 			OnResize();
 
 		return 0;
