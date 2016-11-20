@@ -309,23 +309,7 @@ void DXResourceContext::releaseSizeDependentResources()
 void DXResourceContext::release()
 {
 	// Release all DirectX resources
-	if (mDepthStencilView) { mDepthStencilView->Release(); }
-
-	if (mPostProcessSRV) { mPostProcessSRV->Release(); }
-	if (mBloomMapSRV) { mBloomMapSRV->Release(); }
-	if (mTemporarySRV) { mTemporarySRV->Release(); }
-
-	if (mPrimaryRTV) { mPrimaryRTV->Release(); }
-	if (mTemporaryRTV) { mTemporaryRTV->Release(); }
-	if (mBloomMapRTV) { mBloomMapRTV->Release(); }
-	if (mPostProcessRTV) { mPostProcessRTV->Release(); }
-	if (mBackBufferRTV) { mBackBufferRTV->Release(); }
-
-	if (mPrimaryRT) { mPrimaryRT->Release(); }
-	if (mTemporaryRT) { mTemporaryRT->Release(); }
-	if (mBloomMapRT) { mBloomMapRT->Release(); }
-	if (mPostProcessRT) { mPostProcessRT->Release(); }
-	if (mBackBufferRT) { mBackBufferRT->Release(); }
+	releaseSizeDependentResources();
 
 	if (mSwapChain) { mSwapChain->Release(); }
 	if (mContext) { mContext->Release(); }
