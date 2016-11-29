@@ -11,7 +11,6 @@
 #include <SpriteBatch.h>
 #include <CommonStates.h>
 #include <map>
-#include "DXResource.h"
 
 using namespace DirectX;
 
