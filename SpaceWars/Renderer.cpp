@@ -87,6 +87,7 @@ void Renderer::loadShaders()
 	loadShader(L"PixelShader.cso", &shaders[PS_MAIN], SS_PIXEL);
 	loadShader(L"WireframeShader.cso", &shaders[PS_WIREFRAME], SS_PIXEL);
 	loadShader(L"FieldBlur.cso", &shaders[PS_FIELD_BLUR], SS_PIXEL);
+	loadShader(L"GaussionBlur.cso", &shaders[PS_GAUSSION_BLUR], SS_PIXEL);
 	loadShader(L"BloomExtract.cso", &shaders[PS_BLOOM_EXTRACT], SS_PIXEL);
 	loadShader(L"BloomComposite.cso", &shaders[PS_BLOOM_COMPOSITE], SS_PIXEL);
 }
@@ -246,7 +247,10 @@ void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTarg
 
 	getVS(VS_POST_PROCESS)->SetShader();
 
-	//Extract a bloom map from the scene
+	// POST PROCESS SHADERS
+	//--------------------------------------------------------------------------------
+	// 1. Extract a bloom map from the scene
+	//--------------------------------------------------------------------------------
 	mRC->mContext->PSSetShaderResources(0, 2, null);
 	mRC->mContext->OMSetRenderTargets(1, &mRC->mBloomMapRTV, 0);
 
@@ -263,7 +267,11 @@ void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTarg
 	mRC->mContext->PSSetShaderResources(0, 2, null);
 	mRC->mContext->OMSetRenderTargets(1, &mRC->mTemporaryRTV, 0);
 
-	//Apply Blur to the bloom Map
+	//--------------------------------------------------------------------------------
+	// 2. Apply Blur to the bloom Map
+	//--------------------------------------------------------------------------------
+	
+	/* // Field Bluffer
 	getPS(PS_FIELD_BLUR)->SetShader();
 	getPS(PS_FIELD_BLUR)->SetShaderResourceView("Pixels", mRC->mBloomMapSRV);
 	getPS(PS_FIELD_BLUR)->SetInt("blurAmount", 3);
@@ -273,14 +281,43 @@ void Renderer::postProcess(UINT stride, UINT offset, ID3D11Texture2D* renderTarg
 
 	mRC->mContext->Draw(3, 0);
 
-	getPS(PS_FIELD_BLUR)->SetShaderResourceView("Pixels", 0);
+	//getPS(PS_FIELD_BLUR)->SetShaderResourceView("Pixels", 0); */
 
-	//Render the composite into the back buffer
+	// 2.1 Gaussion Horizontal Pass
+	getPS(PS_GAUSSION_BLUR)->SetShader();
+	getPS(PS_GAUSSION_BLUR)->SetShaderResourceView("Pixels", mRC->mBloomMapSRV);
+	getPS(PS_GAUSSION_BLUR)->SetFloat2("dir", Vector2(1.0, 0));
+	getPS(PS_GAUSSION_BLUR)->SetFloat("pixelWidth", 1.0f / mRC->dimensions.width);
+	getPS(PS_GAUSSION_BLUR)->SetFloat("pixelHeight", 1.0f / mRC->dimensions.height);
+	getPS(PS_GAUSSION_BLUR)->CopyAllBufferData();
+
+	mRC->mContext->Draw(3, 0);
+
+	getPS(PS_GAUSSION_BLUR)->SetShaderResourceView("Pixels", 0);
+
+	// 2.2 Gaussion Vertical Pass
+	mRC->mContext->OMSetRenderTargets(1, &mRC->mBloomMapRTV, 0);
+
+	getPS(PS_GAUSSION_BLUR)->SetShader();
+	getPS(PS_GAUSSION_BLUR)->SetShaderResourceView("Pixels", mRC->mTemporarySRV);
+	getPS(PS_GAUSSION_BLUR)->SetFloat2("dir", Vector2(0, 1.0));
+	getPS(PS_GAUSSION_BLUR)->SetFloat("pixelWidth", 1.0f / mRC->dimensions.width);
+	getPS(PS_GAUSSION_BLUR)->SetFloat("pixelHeight", 1.0f / mRC->dimensions.height);
+	getPS(PS_GAUSSION_BLUR)->CopyAllBufferData();
+
+	mRC->mContext->Draw(3, 0);
+
+	//getPS(PS_FIELD_BLUR)->SetShaderResourceView("Pixels", 0);
+	getPS(PS_GAUSSION_BLUR)->SetShaderResourceView("Pixels", 0);
+
+	//--------------------------------------------------------------------------------
+	// 3. Render the composite into the back buffer
+	//--------------------------------------------------------------------------------
 	mRC->mContext->OMSetRenderTargets(1, &mRC->mBackBufferRTV, 0);
 
 	getPS(PS_BLOOM_COMPOSITE)->SetShader();
 	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("ColorTexture", mRC->mPostProcessSRV);
-	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("BloomTexture", mRC->mTemporarySRV);
+	getPS(PS_BLOOM_COMPOSITE)->SetShaderResourceView("BloomTexture", mRC->mBloomMapSRV);
 	getPS(PS_BLOOM_COMPOSITE)->SetFloat("BloomIntensity", 2.0f);
 	getPS(PS_BLOOM_COMPOSITE)->SetFloat("BloomSaturation", 1.0f);
 	getPS(PS_BLOOM_COMPOSITE)->SetFloat("SceneIntensity", 1.0f);

@@ -2,8 +2,11 @@ cbuffer Data : register(b0)
 {
 	float pixelWidth;
 	float pixelHeight;
-	int blurAmount;
+	float2 dir;
 }
+
+static const float offset[] = { 0.0, 1.0, 2.0, 3.0, 4.0 };
+static const float weights[] = { 0.2270270270, 0.1945945946, 0.1216216216, 0.0540540541, 0.0162162162 };
 
 //Defines the input to this pixel shader
 // - Should match the output of the postProcessVS
@@ -19,21 +22,20 @@ SamplerState Sampler	: register(s0);
 //NOT ACTUALLY GAUSSION BLUR (YET)
 float4 main(VertexToPixel input) : SV_TARGET
 {
-	float4 color = float4(0,0,0,0);
-	uint numSamples = 0;
+	float4 color = Pixels.Sample(Sampler, input.uv) * weights[0];
+	float4 fragmentColor = float4(0, 0, 0, 0);
 
-	for (int y = -blurAmount; y < blurAmount; y++)
+	float hstep = dir.x;
+	float vstep = dir.y;
+
+	for (int i = 1; i < 5; i++)
 	{
-		for (int x = -blurAmount; x < blurAmount; x++)
-		{
-			//Calculate uv of this pixel
-			float2 uv = input.uv + float2(x * pixelWidth, y * pixelWidth);
-
-			//Sample and add
-			color += Pixels.Sample(Sampler, uv);
-			numSamples++;
-		}
+		float2 uvOffset = float2(hstep * offset[i] * pixelWidth, vstep * offset[i] * pixelHeight);
+		fragmentColor +=
+			Pixels.Sample(Sampler, input.uv + uvOffset) * weights[i] +
+			Pixels.Sample(Sampler, input.uv - uvOffset) * weights[i];
 	}
 
-	return color / numSamples;
+	color += fragmentColor;
+	return color;
 }
