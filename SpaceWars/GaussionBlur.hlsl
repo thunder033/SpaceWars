@@ -19,7 +19,8 @@ struct VertexToPixel
 Texture2D Pixels		: register(t0);
 SamplerState Sampler	: register(s0);
 
-//NOT ACTUALLY GAUSSION BLUR (YET)
+// Guassion Blur
+// http://stackoverflow.com/questions/36303950/hlsl-gaussian-blur-effect
 float4 main(VertexToPixel input) : SV_TARGET
 {
 	float4 color = Pixels.Sample(Sampler, input.uv) * weights[0];
