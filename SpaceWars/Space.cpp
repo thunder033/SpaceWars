@@ -31,6 +31,11 @@ void Space::init()
 	entities[4]->GetCollider()->setRadius(.5f);
 	entities[5]->GetCollider()->setRadius(.7f);
 
+	ParticleEmitterDesc emitterDesc = {};
+	emitterDesc.maxParticleCount = 80;
+
+	ParticleEmitter* emitter = new ParticleEmitter(emitterDesc);
+
 	Scene::init();
 }
 

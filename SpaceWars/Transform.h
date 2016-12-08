@@ -30,6 +30,7 @@ public:
 
 	void SetPosition(float x, float y, float z);
 	void SetScale(float x, float y, float z);
+	void SetScale(const float &scale);
 	void SetRotation(float x, float y, float z);
 
 	void SetPosition(Vector3 position);

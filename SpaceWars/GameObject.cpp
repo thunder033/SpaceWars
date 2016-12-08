@@ -7,7 +7,12 @@ GameObject::GameObject(Mesh* mesh, Material* material) : id(autoIncrementId++)
 	this->mesh = mesh;
 	this->material = material;
 	transform = new Transform();
-	this->collider = new Collider(mesh->getVertices(), transform);
+
+	this->collider = nullptr;
+	if (mesh != nullptr) {
+		this->collider = new Collider(mesh->getVertices(), transform);
+	}
+	
 }
 
 
