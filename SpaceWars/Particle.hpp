@@ -55,6 +55,7 @@ public:
 		transform->SetScale(0, 0, 0);
 	}
 
+	// resurrects the particle in a new position with random velocity
 	void spawn(const Vector3 &position)
 	{
 		active = true;
@@ -71,9 +72,10 @@ public:
 			* spread * speed + startVelocity;
 	}
 
-	float getEnergy()
+	// indicates if it's time for the particle to meet its maker
+	bool shouldDie()
 	{
-		return energy;
+		return energy <= 0 && active == true;
 	}
 
 	void update(const float &deltaTime) {

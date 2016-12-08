@@ -25,6 +25,11 @@ void Transform::Scale(float x, float y, float z)
 	SetScale(Vector3(scale.x + x, scale.y + y, scale.z + z));
 }
 
+void Transform::SetScale(const float &scale)
+{
+	SetScale(Vector3(scale, scale, scale));
+}
+
 void Transform::Rotate(float x, float y, float z)
 {
 	SetRotation(Vector3(rotation.x + x, rotation.y + y, rotation.z + z));
