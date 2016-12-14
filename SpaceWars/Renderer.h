@@ -19,6 +19,7 @@ using namespace DirectX;
 
 #define VS_MAIN "mainVS"
 #define VS_POST_PROCESS "postProcessVS"
+#define VS_PARTICLE "particleVS"
 
 #define PS_MAIN "mainPS"
 #define PS_WIREFRAME "wireframePS"
@@ -26,6 +27,7 @@ using namespace DirectX;
 #define PS_BLOOM_EXTRACT "bloomExtractPS"
 #define PS_BLOOM_COMPOSITE "bloomCompositePS"
 #define PS_GAUSSION_BLUR "gaussionBlurPS"
+#define PS_PARTICLE "particlePS"
 
 class Renderer
 {

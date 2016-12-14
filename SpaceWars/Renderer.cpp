@@ -82,6 +82,7 @@ void Renderer::loadShaders()
 	//Load Vertext Shaders
 	loadShader(L"VertexShader.cso", &shaders[VS_MAIN], SS_VERTEX);
 	loadShader(L"PostProcessVS.cso", &shaders[VS_POST_PROCESS], SS_VERTEX);
+	loadShader(L"ParticleVS.cso", &shaders[VS_PARTICLE], SS_VERTEX);
 
 	//Load Pixel Shaders
 	loadShader(L"PixelShader.cso", &shaders[PS_MAIN], SS_PIXEL);
@@ -90,6 +91,7 @@ void Renderer::loadShaders()
 	loadShader(L"GaussionBlur.cso", &shaders[PS_GAUSSION_BLUR], SS_PIXEL);
 	loadShader(L"BloomExtract.cso", &shaders[PS_BLOOM_EXTRACT], SS_PIXEL);
 	loadShader(L"BloomComposite.cso", &shaders[PS_BLOOM_COMPOSITE], SS_PIXEL);
+	loadShader(L"ParticlePS.cso", &shaders[PS_PARTICLE], SS_PIXEL);
 }
 
 void Renderer::createSampler()
