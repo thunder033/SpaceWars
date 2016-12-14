@@ -1,23 +1,44 @@
+cbuffer externalData : register(b0)
+{
+	matrix view;
+	matrix projection;
+}
+
+//Describes inidividual vertex data
+struct VertexShaderInput
+{
+	float3 position		: POSITION;
+	float2 uv			: TEXCOORD;
+	float4 color		: COLOR;
+	float  size			: SIZE;
+};
+
+//Defines the output of the vertex shader
 struct VertexToPixel
 {
 	float4 position		: SV_POSITION;
 	float2 uv			: TEXCOORD0;
+	float4 color		: TEXCOORD1;
 };
 
-VertexToPixel main( uint id : SV_VertexID )
+VertexToPixel main( VertexShaderInput input )
 {
 	//Create output
 	VertexToPixel output;
 
-	//Calculate the UV (0,0) to the (2,2) using the ID
-	output.uv = float2(
-		(id << 1) & 2, // id % 2 * 2
-		id & 2);
+	//Calculate output position
+	matrix viewProj = mul(view, projection);
+	output.position = mul(float4(input.position, 1.0f), viewProj);
 
-	//Adjust the position based on the UV
-	output.position = float4(output.uv, 0, 1);
-	output.position.x = output.position.x * 2 - 1;
-	output.position.y = output.position.y * -2 + 1;
+	//Use UV to offset Position (billboarding)
+	float2 offset = input.uv * 2 - 1;
+	offset *= input.size;
+	offset.y *= -1;
+	output.position.xy += offset;
+
+	//pass uv through
+	output.uv = input.uv;
+	output.color = input.color;
 
 	return output;
 }

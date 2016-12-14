@@ -69,7 +69,7 @@ void ParticleEmitter::update(const float & deltaTime)
 	}
 
 	int count = maxParticleCount;
-	for (int p = endPosition, int c = 0; c < count; p++, c++)
+	for (int p = endPosition, c = 0; c < count; p++, c++)
 	{
 		if (p >= maxParticleCount)
 		{
