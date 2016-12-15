@@ -4,6 +4,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterDesc & desc)
 	:GameObject(nullptr, desc.material)
 {
 	if (desc.transform != nullptr) {
+		delete transform;
 		this->transform = desc.transform;
 	}
 
@@ -26,6 +27,7 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterDesc & desc)
 	particleDesc.speed = desc.speed;
 	particleDesc.startVelocity = desc.startVelocity;
 	particleDesc.spread = desc.spread;
+	particleDesc.spawnPosition = transform->GetPosition();
 
 	particleVertices = new ParticleVertex[4 * maxParticleCount];
 	for (int i = 0; i < maxParticleCount * 4; i += 4)
@@ -158,6 +160,9 @@ Particle** ParticleEmitter::getParticles()
 
 bool ParticleEmitter::canEmit()
 {
+	// We can emit a particle if
+	// - the head is not at the same position as the tail
+	// - OR there are no particles spawned yet
 	return headPosition != tailPosition || particles[0] == nullptr;
 }
 

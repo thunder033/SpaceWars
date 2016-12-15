@@ -6,6 +6,7 @@ struct ParticleDesc
 	float sizeDecay = 0;
 	float speed = 0;
 	float startEnergy;
+	Vector3 spawnPosition;
 	Vector3 startVelocity;
 	Vector3 spread;
 };
@@ -42,6 +43,7 @@ public:
 		spread(desc.spread)
 	{
 		transform = new Transform();
+		transform->SetPosition(desc.spawnPosition);
 
 		velocity = Vector3::Zero;
 		acceleration = Vector3::Zero;

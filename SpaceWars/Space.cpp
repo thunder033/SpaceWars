@@ -33,15 +33,16 @@ void Space::init()
 
 	ParticleEmitterDesc emitterDesc = {};
 	emitterDesc.maxParticleCount = 500;
-	emitterDesc.energy = 6;
+	emitterDesc.energy = 5.0f;
 	emitterDesc.material = Material::getByName("particle");
-	emitterDesc.rate = 60.0f;
+	emitterDesc.rate = 80.0f;
 	emitterDesc.speed = 2.0f;
 	emitterDesc.sizeDecay = 0.03f;
-	emitterDesc.transform = new Transform();
-	emitterDesc.transform->SetScale(0.2f);
+	emitterDesc.startVelocity = Vector3(1.0f, 0, 0);
+	emitterDesc.spread = Vector3(1.0f, 0.2f, 1.0f);
 
 	entities.push_back(new ParticleEmitter(emitterDesc));
+	entities[6]->getTransform()->SetScale(0.2f);
 
 	Scene::init();
 }
@@ -64,6 +65,9 @@ void Space::update(float deltaTime, float totalTime)
 	entities[5]->getTransform()->SetPosition(4, 0, 0);
 	entities[5]->getTransform()->SetRotation(totalTime * 3, 0, totalTime * 3);
 	entities[5]->getTransform()->SetScale(2, 2, 2);
+
+	//Move particle emitter up and down
+	entities[6]->getTransform()->SetPosition(1.0f, -sin(totalTime * 2) / 2.0f, 0);
 
 	if (GetAsyncKeyState(VK_RIGHT) & 0x8000) {
 		entities[4]->translate(Vector3(deltaTime, 0, 0));
