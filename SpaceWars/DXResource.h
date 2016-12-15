@@ -9,7 +9,7 @@ protected:
 	static DXResourceContext* mRC;
 public:
 	DXResource();
-	~DXResource();
+	virtual ~DXResource();
 
 	static void setResourceContext(DXResourceContext* rc);
 };

@@ -41,6 +41,11 @@ ParticleEmitter::ParticleEmitter(const ParticleEmitterDesc & desc)
 
 ParticleEmitter::~ParticleEmitter()
 {
+	for (int i = 0; i < maxParticleCount; i++)
+	{
+		delete particles[i];
+	}
+
 	delete[] particles;
 	delete[] particleVertices;
 	vertexBuffer->Release();

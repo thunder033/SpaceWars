@@ -41,8 +41,6 @@ class Renderer
 	ID3D11ShaderResourceView* defaultSrv;
 	
 	//Post processing
-
-
 	std::unique_ptr<DirectX::CommonStates> renderStates;
 	ID3D11RasterizerState* wireFrameState;
 	ID3D11DepthStencilState* particleDepthState;

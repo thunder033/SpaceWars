@@ -172,6 +172,8 @@ Renderer::~Renderer()
 	if (defaultSrv) { defaultSrv->Release(); }
 
 	if (wireFrameState) { wireFrameState->Release(); }
+	if (particleBlendState) { particleBlendState->Release(); }
+	if (particleDepthState) { particleDepthState->Release(); }
 
 }
 
