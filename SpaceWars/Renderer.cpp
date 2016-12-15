@@ -135,6 +135,28 @@ Renderer::Renderer(DXResourceContext* rc)
 	RSWireFrameDesc.AntialiasedLineEnable = true;
 
 	HRESULT created = mRC->mDevice->CreateRasterizerState(&RSWireFrameDesc, &wireFrameState);
+
+	// A depth state for the particles
+	D3D11_DEPTH_STENCIL_DESC dsDesc = {};
+	dsDesc.DepthEnable = true;
+	dsDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // Turns off depth writing
+	dsDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	mRC->mDevice->CreateDepthStencilState(&dsDesc, &particleDepthState);
+
+
+	// Blend for particles (additive)
+	D3D11_BLEND_DESC blend = {};
+	blend.AlphaToCoverageEnable = false;
+	blend.IndependentBlendEnable = false;
+	blend.RenderTarget[0].BlendEnable = true;
+	blend.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	blend.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	blend.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	blend.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	blend.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	blend.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	blend.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	mRC->mDevice->CreateBlendState(&blend, &particleBlendState);
 }
 
 
@@ -151,6 +173,57 @@ Renderer::~Renderer()
 
 	if (wireFrameState) { wireFrameState->Release(); }
 
+}
+
+void Renderer::render(ParticleEmitter* emitter, Camera* camera)
+{
+	auto headPos = emitter->getHeadPosition();
+	auto tailPos = emitter->getTailPosition();
+	int& particleCount = emitter->getMaxParticleCount();
+
+	if (headPos == tailPos && emitter->canEmit())
+	{
+		return;
+	}
+
+	// Particle states
+	float blend[4] = { 1,1,1,1 };
+	mRC->mContext->OMSetBlendState(particleBlendState, blend, 0xffffffff);  // Additive blending
+	mRC->mContext->OMSetDepthStencilState(particleDepthState, 0);			// No depth WRITING
+
+	emitter->copyBuffers(mRC->mContext);
+
+	UINT stride = sizeof(ParticleVertex);
+	UINT offset = 0;
+
+	ID3D11Buffer* vertexBuffer = emitter->getVertexBuffer();
+	mRC->mContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride, &offset);
+	mRC->mContext->IASetIndexBuffer(emitter->getIndexBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	mRC->mContext->RSSetState(wireFrameState);
+
+	getVS(VS_PARTICLE)->SetMatrix4x4("view", camera->getViewMatrix());
+	getVS(VS_PARTICLE)->SetMatrix4x4("projection", camera->getProjectionMatrix());
+	getVS(VS_PARTICLE)->SetShader();
+	getVS(VS_PARTICLE)->CopyAllBufferData();
+
+	getPS(PS_PARTICLE)->SetSamplerState("trilinear", sampler);
+	getPS(PS_PARTICLE)->SetShaderResourceView("particle", emitter->getMaterial()->getTexture());
+	getPS(PS_PARTICLE)->SetShader();
+	getPS(PS_PARTICLE)->CopyAllBufferData();
+
+	if (headPos > tailPos)
+	{
+		mRC->mContext->DrawIndexed((headPos - tailPos) * 6, tailPos * 6, 0);
+	}
+	else {
+		mRC->mContext->DrawIndexed(headPos * 6, 0, 0);
+		mRC->mContext->DrawIndexed((particleCount - tailPos) * 6, tailPos * 6, 0);
+	}
+
+	// Reset to default states for next frame
+	mRC->mContext->OMSetBlendState(0, blend, 0xffffffff);
+	mRC->mContext->OMSetDepthStencilState(0, 0);
 }
 
 void Renderer::render(GameObject * gameObject, Camera * camera)

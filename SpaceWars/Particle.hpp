@@ -10,6 +10,14 @@ struct ParticleDesc
 	Vector3 spread;
 };
 
+struct ParticleVertex
+{
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT2 uv;
+	DirectX::XMFLOAT4 color;
+	float size;
+};
+
 class Particle 
 {
 	Transform* transform;
@@ -35,8 +43,8 @@ public:
 	{
 		transform = new Transform();
 
-		velocity = Vector3(0.0);
-		acceleration = Vector3(0.0);
+		velocity = Vector3::Zero;
+		acceleration = Vector3::Zero;
 		active = true;
 	}
 
@@ -65,9 +73,9 @@ public:
 
 		velocity = Vector3(
 			//Set the particle off in a random direction
-			0.5 - ((double) rand() / (RAND_MAX)) + 1, 
-			0.5 - ((double)rand() / (RAND_MAX)) + 1,
-			0.5 - ((double)rand() / (RAND_MAX)) + 1) 
+			0.5 - ((double)rand() / (RAND_MAX)), 
+			0.5 - ((double)rand() / (RAND_MAX)),
+			0.5 - ((double)rand() / (RAND_MAX))) 
 			//Apply the parameters to determin final direction
 			* spread * speed + startVelocity;
 	}
@@ -81,8 +89,18 @@ public:
 	void update(const float &deltaTime) {
 		velocity += acceleration * deltaTime;
 		transform->Translate(velocity * deltaTime);
-		transform->SetScale(1.0f - sizeDecay);
+		transform->Scale(Vector3(1.0f - sizeDecay));
 
 		energy -= deltaTime;
+	}
+
+	Vector3 const getPosition()
+	{
+		return transform->GetPosition();
+	}
+
+	float const getSize()
+	{
+		return transform->GetScale().x;
 	}
 };

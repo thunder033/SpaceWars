@@ -7,6 +7,7 @@ GameObject::GameObject(Mesh* mesh, Material* material) : id(autoIncrementId++)
 	this->mesh = mesh;
 	this->material = material;
 	transform = new Transform();
+	collisionTest = ObjectType::Solid;
 
 	this->collider = nullptr;
 	if (mesh != nullptr) {

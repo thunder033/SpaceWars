@@ -64,6 +64,7 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
+	DXResource::setResourceContext(mRC.get());
 
 	//Instantiate the renderer that stores render data and will (eventually) handle rendering
 	renderer = std::unique_ptr<Renderer>(new Renderer(mRC.get()));
@@ -87,6 +88,7 @@ void Game::Init()
 	new Material("blue", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 0.15f, 1, 1), renderer->getDefaultTexture());
 	new Material("red", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(1, 0.15f, 0.15, 1), renderer->getDefaultTexture());
 	new Material("green", renderer->getVertexShader(), renderer->getPixelShader(), XMFLOAT4(0.15f, 1, 0.15, 1), renderer->getDefaultTexture());
+	new Material("particle", renderer->getVS(VS_PARTICLE), renderer->getPS(PS_PARTICLE), XMFLOAT4(1, 1, 1, 1), renderer->getDefaultTexture());
 
 	CreateLights();
 
@@ -168,7 +170,14 @@ void Game::Draw(float deltaTime, float totalTime)
 	std::vector<GameObject*> entities = Scene::getActive()->getEntities();
 	std::vector<GameObject*>::iterator it;
 	for (it = entities.begin(); it < entities.end(); it++) {
-		renderer->render(*it, camera.get());
+		if ((*it)->getType() == ObjectType::ParticleEmitter)
+		{
+			renderer->render(static_cast<ParticleEmitter*>(*it), camera.get());
+		}
+		else
+		{
+			renderer->render(*it, camera.get());
+		}
 	}
 
 	Scene::getActive()->draw(deltaTime, totalTime, renderer.get());

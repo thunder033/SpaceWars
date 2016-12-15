@@ -10,7 +10,8 @@ using namespace DirectX;
 
 enum class ObjectType
 {
-	Default
+	Solid,
+	ParticleEmitter
 };
 
 class GameObject
@@ -43,9 +44,6 @@ public:
 
 	//Return this entity's transform
 	Transform* getTransform() const;
-
-	//Send data from this entity to the GPU
-	void prepareMaterial(DirectX::XMFLOAT4X4 viewMatrix, DirectX::XMFLOAT4X4 projectionMatrix, ID3D11SamplerState* sampler);
 
 	//Calculate the world matrix transpose for this entity
 	DirectX::XMFLOAT4X4 getDrawMatrix();

@@ -11,6 +11,7 @@
 #include <SpriteBatch.h>
 #include <CommonStates.h>
 #include <map>
+#include "ParticleEmitter.h"
 
 using namespace DirectX;
 
@@ -44,6 +45,8 @@ class Renderer
 
 	std::unique_ptr<DirectX::CommonStates> renderStates;
 	ID3D11RasterizerState* wireFrameState;
+	ID3D11DepthStencilState* particleDepthState;
+	ID3D11BlendState* particleBlendState;
 
 	std::unique_ptr<SpriteBatch> spriteBatch;
 	std::unique_ptr<SpriteFont> spriteFont;
@@ -60,6 +63,7 @@ public:
 
 	//TODO: implement this
 	void render(GameObject* gameObject, Camera* camera);
+	void render(ParticleEmitter* emitter, Camera* camera);
 	
 	//Send light data to the pixel shader
 	void setLightData(DirectionalLight* lights);

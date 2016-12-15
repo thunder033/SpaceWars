@@ -49,6 +49,9 @@ void generateHelper(unsigned int maxObjects, std::vector<GameObject*> &objects, 
 		std::vector<GameObject*> containedObjects = std::vector<GameObject*>();
 		for (GameObject* temp : objects)
 		{
+			if (temp->getType() != ObjectType::Solid)
+				continue;
+
 			Vector3 tempMin = temp->GetCollider()->getMin() + temp->getPosition();
 			Vector3 tempMax = temp->GetCollider()->getMax() + temp->getPosition();
 			if (tempMin.x >= min.x && tempMax.x <= max.x &&
@@ -62,7 +65,7 @@ void generateHelper(unsigned int maxObjects, std::vector<GameObject*> &objects, 
 		{
 			Vector3 center = ((min + max) / 2.f);
 			start->generateLeaves();
-			generateHelper(maxObjects, containedObjects, start->getLeaf(0), min, ((min + max) / 2.f));
+			generateHelper(maxObjects, containedObjects, start->getLeaf(0), min, center);
 			generateHelper(maxObjects, containedObjects, start->getLeaf(1), min + Vector3((max.x - min.x) / 2.f, 0.0f, 0.0f),
 				center + Vector3((max.x - min.x) / 2.f, 0.0f, 0.0f));
 			generateHelper(maxObjects, containedObjects, start->getLeaf(2), min + Vector3(0.f, 0.f, (max.z - min.z) / 2.f),

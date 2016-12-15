@@ -42,7 +42,7 @@ void Transform::Translate(Vector3 translation)
 
 void Transform::Scale(Vector3 scale)
 {
-	SetScale(Vector3(this->scale.x + scale.x, this->scale.y + scale.y, this->scale.z + scale.z));
+	SetScale(Vector3(this->scale.x * scale.x, this->scale.y * scale.y, this->scale.z * scale.z));
 }
 
 void Transform::Rotate(Vector3 rotation)

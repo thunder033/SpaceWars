@@ -13,6 +13,7 @@
 #include "Space.h"
 #include "GameScene.h"
 #include <map>
+#include "DXResource.h"
 
 class Game 
 	: public DXCore

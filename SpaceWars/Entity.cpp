@@ -29,10 +29,10 @@ void Entity::physicsUpdate(Octree* octree, float deltaTime)
 	auto& instancesToCheck = octree->nearbyObjects(this);
 	for (auto obj : instancesToCheck)
 	{
-		if (obj == this || frameCollisions.find(this->getID()) != frameCollisions.end())
+		if (this->collisionTest != ObjectType::Solid || obj->getType() != ObjectType::Solid)
 			continue;
 
-		if (this->collisionTest != ObjectType::Default && this->collisionTest != obj->getType())
+		if (obj == this || frameCollisions.find(this->getID()) != frameCollisions.end())
 			continue;
 
 		//checkCount++;
